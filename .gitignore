@@ -1,0 +1,43 @@
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# TypeScript
+*.tsbuildinfo
+dist/
+build/
+
+# Env / config
+.env
+.env.local
+.env.*.local
+
+# Vault & sensitive data
+**/.cloak/
+vault.json
+*.vault.json
+cloak.config.json
+
+# VSCode settings
+.vscode/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Python virtual environment (if used)
+venv/
+*.pyc
+__pycache__/
+
+# Test coverage
+coverage/
+
+# Logs
+logs/
+*.log
+
+# Optional: CLI cache
+.cloak-cache/
