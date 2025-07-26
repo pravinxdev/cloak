@@ -6,6 +6,9 @@ import { getCommand } from './commands/get';
 import { setCommand } from './commands/set';
 import { loginCommand } from './commands/login';
 import { logoutCommand } from './commands/logout';
+import { statusCommand } from './commands/status';
+import { listCommand } from './commands/list';
+
 
 const program = new Command();
 
@@ -20,6 +23,8 @@ program
   .addCommand(getCommand())
   .addCommand(setCommand())
   .addCommand(loginCommand())
-  .addCommand(logoutCommand());
+  .addCommand(logoutCommand())
+  .addCommand(listCommand())
+  .addCommand(statusCommand());
 
 program.parse(process.argv);
