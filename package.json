@@ -9,11 +9,22 @@
   "scripts": {
     "build": "tsc",
     "dev": "ts-node src/index.ts",
+    "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["cli", "vault", "security"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "cli",
+    "vault",
+    "security",
+    "encryption"
+    
+  ],
   "author": "Pravin",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "chalk": "^5.4.1",
     "commander": "^14.0.0",
