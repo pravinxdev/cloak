@@ -16,12 +16,16 @@
     "dist",
     "README.md"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pravinxdev/cloak.git"
+  },
+  "homepage": "https://github.com/pravinxdev/cloak#readme",
   "keywords": [
     "cli",
     "vault",
     "security",
     "encryption"
-    
   ],
   "author": "Pravin",
   "license": "MIT",
