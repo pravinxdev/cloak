@@ -1,18 +1,18 @@
 {
-  "name": "cloak",
+  "name": "cloakx",
   "version": "1.0.0",
-  "description": "Cloak is a secure, lightweight CLI tool to manage your development secrets locally — no cloud, no hassle. Store, retrieve, and manage secrets across projects with encryption and ease. 🔐 Perfect for solo devs, indie hackers, and teams who value speed, simplicity, and security.",
+  "description": "Cloakx is a secure, lightweight CLI tool to manage your development secrets locally — no cloud, no hassle. Store, retrieve, and manage secrets across projects with encryption and ease. 🔐 Perfect for solo devs, indie hackers, and teams who value speed, simplicity, and security.",
   "main": "index.js",
   "bin": {
-    "cloak": "./dist/index.js"
+    "cloakx": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",
     "dev": "ts-node src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["cli", "vault", "security"],
+  "author": "Pravin",
   "license": "ISC",
   "dependencies": {
     "chalk": "^5.4.1",

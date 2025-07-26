@@ -34,7 +34,7 @@ export function loginCommand() {
     }
 
     const session = {
-      token: Buffer.from('pravin').toString('base64'),
+      token: Buffer.from(`${Date.now()}`).toString('base64'),
       createdAt: new Date().toISOString(),
       createdAtTimestamp: Date.now(),
     };
