@@ -1,6 +1,6 @@
 {
   "name": "cloakx",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Cloakx is a secure, lightweight CLI tool to manage your development secrets locally — no cloud, no hassle. Store, retrieve, and manage secrets across projects with encryption and ease. 🔐 Perfect for solo devs, indie hackers, and teams who value speed, simplicity, and security.",
   "main": "index.js",
   "bin": {
@@ -21,18 +21,18 @@
     "url": "https://github.com/pravinxdev/cloak.git"
   },
   "homepage": "https://github.com/pravinxdev/cloak#readme",
-"keywords": [
-  "cli-tool",
-  "secure-vault",
-  "local-encryption",
-  "password-manager",
-  "secret-storage",
-  "encrypted-storage",
-  "credential-manager",
-  "token-manager",
-  "secure-cli",
-  "data-encryption"
-],
+  "keywords": [
+    "cli-tool",
+    "secure-vault",
+    "local-encryption",
+    "password-manager",
+    "secret-storage",
+    "encrypted-storage",
+    "credential-manager",
+    "token-manager",
+    "secure-cli",
+    "data-encryption"
+  ],
   "author": "Pravin",
   "license": "MIT",
   "dependencies": {
