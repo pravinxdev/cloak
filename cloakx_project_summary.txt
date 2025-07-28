@@ -1,0 +1,66 @@
+
+📦 Cloakx Project Summary — 2025-07-28
+
+This document captures all the planned and implemented features for the `cloakx` project CLI tool as discussed.
+
+─────────────────────────────
+🔐 Authentication & Security
+─────────────────────────────
+- Master password protection for vault access.
+- Optional password prompt via `inquirer` or `readline-sync`.
+- Password required for decrypting files (e.g., via command prompt popup).
+
+─────────────────────────────
+📁 File Encryption & Privacy
+─────────────────────────────
+- `cloakx encrypt <file>`: Encrypts the file (e.g., test.txt → test.txt.cxf).
+- `cloakx decrypt <file>`: Decrypts `.cxf` back to original content.
+- File cannot be opened/viewed without password.
+- (Planned) Auto-popup terminal when trying to open encrypted file, asking for password.
+- `cloakx hide <file>`: Hides the file from explorer view.
+- `cloakx unhide <file>`: Unhides the file.
+
+─────────────────────────────
+🗂️ Grouped Secret Management
+─────────────────────────────
+- Secrets can be stored under named groups.
+- Commands like:
+  - `cloakx set <group> <key> <value>`
+  - `cloakx get <group> <key>`
+  - `cloakx list <group>`
+  - `cloakx delete <group> <key>`
+
+─────────────────────────────
+🌐 Localhost Web UI (Planned)
+─────────────────────────────
+- Run local server using `cloakx serve`.
+- View, add, edit secrets via browser.
+- Password protected UI.
+
+─────────────────────────────
+🛠️ Unique & Utility Commands (Planned)
+─────────────────────────────
+- `cloakx info`: Display vault info/stats.
+- `cloakx backup <path>`: Export encrypted vault backup.
+- `cloakx restore <file>`: Restore from backup.
+- `cloakx lock`: Force logout / re-authentication.
+- `cloakx clear`: Clear all saved secrets.
+- `cloakx history`: Show command history or audit logs.
+- `cloakx search <query>`: Search keys/values in vault.
+
+─────────────────────────────
+📦 Distribution
+─────────────────────────────
+- NPM install: `npm i -g cloakx`
+- Planned: `.deb` package for Debian/Ubuntu
+  - Install via: `sudo apt install cloakx`
+  - Includes CLI and optional GUI
+  - `.desktop` and `.bash`/`.zsh` integration
+
+─────────────────────────────
+📄 Future Suggestions
+─────────────────────────────
+- Notifications or alerts for file access attempts.
+- Self-destructing secrets or time-limited access.
+- Integration with cloud vaults (optional).
+- Auto sync between machines (optional opt-in).
