@@ -6,7 +6,7 @@ import { getSessionPassword } from '../utils/session';
 import { vaultPath } from '../config/paths';
 
 export function setCommand() {
-  const cmd = new Command('set');
+  const cmd = new Command('set').aliases(['add']);
   cmd.arguments('<key> <value>').action((key, value) => {
     const password = getSessionPassword();
    let data: Record<string, string> = {}; // ✅ Correctly typed object

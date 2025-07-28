@@ -21,12 +21,18 @@
     "url": "https://github.com/pravinxdev/cloak.git"
   },
   "homepage": "https://github.com/pravinxdev/cloak#readme",
-  "keywords": [
-    "cli",
-    "vault",
-    "security",
-    "encryption"
-  ],
+"keywords": [
+  "cli-tool",
+  "secure-vault",
+  "local-encryption",
+  "password-manager",
+  "secret-storage",
+  "encrypted-storage",
+  "credential-manager",
+  "token-manager",
+  "secure-cli",
+  "data-encryption"
+],
   "author": "Pravin",
   "license": "MIT",
   "dependencies": {

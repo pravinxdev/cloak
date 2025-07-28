@@ -25,7 +25,7 @@ program
   .addCommand(getCommand())
   .addCommand(setCommand())
   .addCommand(loginCommand())
-  .addCommand(logoutCommand())
+  // .addCommand(logoutCommand())
   .addCommand(listCommand())
   .addCommand(statusCommand())
   .addCommand(deleteCommand())

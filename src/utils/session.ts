@@ -22,15 +22,15 @@ export function createSession(password: string,username='user') {
 }
 
 export function getSessionPassword(): string {
-  if (!fs.existsSync(sessionPath)) throw new Error('No active session. Please login.');
+  // if (!fs.existsSync(sessionPath)) throw new Error('No active session. Please login.');
 
   const session = JSON.parse(fs.readFileSync(sessionPath, 'utf-8'));
   const now = Date.now();
 
-  if (!session.createdAtTimestamp || now - session.createdAtTimestamp > 30 * 60 * 1000) {
-    fs.unlinkSync(sessionPath);
-    throw new Error('Session expired. Please login again.');
-  }
+  // if (!session.createdAtTimestamp || now - session.createdAtTimestamp > 30 * 60 * 1000) {
+  //   fs.unlinkSync(sessionPath);
+  //   throw new Error('Session expired. Please login again.');
+  // }
 
   // Decode base64 back to original password
   return Buffer.from(session.token, 'base64').toString('utf-8');
@@ -46,10 +46,10 @@ export function getSession() {
     const now = Date.now();
     const isExpired = !session.createdAtTimestamp || now - session.createdAtTimestamp > 30 * 60 * 1000;
 
-    if (isExpired) {
-      fs.unlinkSync(sessionPath);
-      return null;
-    }
+    // if (isExpired) {
+    //   fs.unlinkSync(sessionPath);
+    //   return null;
+    // }
 
     return {
       username: session.username || 'user', // default, or fetch from vault if available
