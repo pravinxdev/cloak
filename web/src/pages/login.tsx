@@ -30,6 +30,17 @@ export default function Login({ onLogin }: any) {
 }
 
 const styles = {
-  container: { display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center' },
-  card: { padding: 30, border: '1px solid #ccc', borderRadius: 10 },
+  container: {
+    display: 'flex',
+    height: '100vh',
+    justifyContent: 'center',
+    alignItems: 'center',
+    background: '#f5f5f5',
+  },
+  card: {
+    padding: 30,
+    borderRadius: 12,
+    background: 'white',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+  },
 };
