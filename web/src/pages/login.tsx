@@ -6,41 +6,32 @@ export default function Login({ onLogin }: any) {
 
   const handleLogin = async () => {
     const res = await api.login(password);
-
-    if (res.ok) {
-      onLogin();
-    } else {
-      alert('Invalid password');
-    }
+    if (res.ok) onLogin();
+    else alert('Invalid password');
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2>🔐 Cloakx Login</h2>
+    <div className="h-screen flex items-center justify-center">
+
+      <div className="glass p-8 rounded-2xl w-80 shadow-xl">
+        <h2 className="text-2xl font-bold mb-6 text-center">
+          🔐 Cloakx
+        </h2>
+
         <input
           type="password"
           placeholder="Enter password"
+          className="w-full p-2 mb-4 rounded bg-white/10 outline-none"
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button onClick={handleLogin}>Login</button>
+
+        <button
+          onClick={handleLogin}
+          className="w-full bg-blue-500 hover:bg-blue-600 transition py-2 rounded"
+        >
+          Login
+        </button>
       </div>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    display: 'flex',
-    height: '100vh',
-    justifyContent: 'center',
-    alignItems: 'center',
-    background: '#f5f5f5',
-  },
-  card: {
-    padding: 30,
-    borderRadius: 12,
-    background: 'white',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-  },
-};

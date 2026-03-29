@@ -7,10 +7,11 @@
     "cloakx": "./dist/index.js"
   },
   "scripts": {
-  "dev:server": "npx ts-node server/index.ts",
-  "dev:web": "npm --prefix web run dev",
-  "dev": "concurrently \"npm run dev:server\" \"npm run dev:web\""
-},
+    "build": "tsc",
+    "dev:server": "npx ts-node server/index.ts",
+    "dev:web": "npm --prefix web run dev",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:web\""
+  },
   "engines": {
     "node": ">=16"
   },
@@ -44,6 +45,7 @@
     "concurrently": "^9.2.1",
     "express": "^5.2.1",
     "inquirer": "^12.8.2",
+    "open": "^11.0.0",
     "readline-sync": "^1.4.10"
   },
   "devDependencies": {
