@@ -2,7 +2,7 @@
 import { Command } from 'commander';
 import { loadVault, saveVault } from '../utils/vault';
 import { encrypt } from '../utils/crypto';
-import { getSessionPassword } from '../utils/session';
+import { getSessionKey } from '../utils/session';
 
 /**
  * Update a secret value by key.
@@ -15,9 +15,11 @@ export async function updateSecret(key: string, value: string): Promise<void> {
       console.error(`❌ Key "${key}" does not exist.`);
       process.exit(1);
     }
+const keyBuf = getSessionKey();
+const encrypted = encrypt(value, keyBuf);
 
-    const password = await getSessionPassword();
-    const encrypted = encrypt(value, password);
+    // const password = await getSessionPassword();
+    // const encrypted = encrypt(value, password);
     vault[key] = encrypted;
     saveVault(vault);
 
