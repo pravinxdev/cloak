@@ -12,6 +12,7 @@ import { deleteCommand } from './commands/delete';
 import updCommand from './commands/update';
 import { importCommand } from './commands/import';
 import { exportCommand } from './commands/export';
+import { webCommand } from './commands/web';
 const program = new Command();
 
 program
@@ -31,7 +32,8 @@ program
   .addCommand(deleteCommand())
   .addCommand(updCommand)
   .addCommand(exportCommand())
-  .addCommand(importCommand());
+  .addCommand(importCommand())
+  .addCommand(webCommand());
 
 
 program.parse(process.argv);

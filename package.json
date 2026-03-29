@@ -8,9 +8,12 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "ts-node src/index.ts",
-    "start": "node dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev:server": "ts-node server/index.ts",
+    "dev:web": "cd web && npm run dev",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:web\""
+  },
+  "engines": {
+    "node": ">=16"
   },
   "files": [
     "dist",
@@ -39,6 +42,7 @@
     "chalk": "^5.4.1",
     "clipboardy": "^5.3.1",
     "commander": "^14.0.0",
+    "express": "^5.2.1",
     "inquirer": "^12.8.2",
     "readline-sync": "^1.4.10"
   },

@@ -41,3 +41,8 @@ logs/
 
 # Optional: CLI cache
 .cloak-cache/
+
+
+
+web/node_modules/
+web/dist/
