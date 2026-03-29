@@ -16,7 +16,7 @@ import { webCommand } from './commands/web';
 const program = new Command();
 
 program
-  .name('cloak')
+  .name('cloakx')
   .description('Secure CLI for managing encrypted secrets')
   .version('1.0.0');
 

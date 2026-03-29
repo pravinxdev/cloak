@@ -10,7 +10,7 @@ export function listCommand(): Command {
     .action(() => {
       const session = getSession();
       if (!session) {
-        console.log('❌ Please login first using `cloak login`.');
+        console.log('❌ Please login first using `cloakx login`.');
         return;
       }
 

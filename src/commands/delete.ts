@@ -13,7 +13,7 @@ export function deleteCommand(): Command {
     .action((key: string) => {
       const session = getSession();
       if (!session) {
-        console.log('❌ Please login first using `cloak login`.');
+        console.log('❌ Please login first using `cloakx login`.');
         return;
       }
 

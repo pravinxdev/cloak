@@ -23,8 +23,13 @@
 Install `cloakx` globally using npm:
 
 ```bash
+### Install globally
+
 npm install -g cloakx
-```
+# or
+yarn global add cloakx
+# or
+pnpm add -g cloakx```
 
 ---
 
