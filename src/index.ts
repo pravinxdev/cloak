@@ -11,7 +11,7 @@ import { listCommand } from './commands/list';
 import { deleteCommand } from './commands/delete';
 import updCommand from './commands/update';
 
-
+import { exportCommand } from './commands/export';
 const program = new Command();
 
 program
@@ -30,6 +30,7 @@ program
   .addCommand(statusCommand())
   .addCommand(deleteCommand())
   .addCommand(updCommand)
+  .addCommand(exportCommand());
 
 
 program.parse(process.argv);
