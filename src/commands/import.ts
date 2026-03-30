@@ -1,7 +1,7 @@
 // import { Command } from 'commander';
 // import fs from 'fs';
 // import inquirer from 'inquirer';
-// import { vaultPath } from '../config/paths';
+// import { getVaultPath() } from '../config/paths';
 // import { encrypt } from '../utils/crypto';
 // import { getSessionKey } from '../utils/session';
 
@@ -31,8 +31,8 @@
 
 //       let vault: Record<string, string> = {};
 
-//       if (fs.existsSync(vaultPath)) {
-//         vault = JSON.parse(fs.readFileSync(vaultPath, 'utf-8'));
+//       if (fs.existsSync(getVaultPath())) {
+//         vault = JSON.parse(fs.readFileSync(getVaultPath(), 'utf-8'));
 //       }
 
 //       for (const line of lines) {
@@ -61,7 +61,7 @@
 //         console.log(`✅ Imported ${k}`);
 //       }
 
-//       fs.writeFileSync(vaultPath, JSON.stringify(vault, null, 2));
+//       fs.writeFileSync(getVaultPath(), JSON.stringify(vault, null, 2));
 //     });
 
 //   return cmd;
@@ -69,7 +69,7 @@
 import { Command } from 'commander';
 import fs from 'fs';
 import inquirer from 'inquirer';
-import { vaultPath } from '../config/paths';
+import { getVaultPath } from '../config/paths';
 import { encrypt } from '../utils/crypto';
 import { getSessionKey } from '../utils/session';
 
@@ -100,8 +100,8 @@ export function importCommand() {
 
             let vault: Record<string, string> = {};
 
-            if (fs.existsSync(vaultPath)) {
-                vault = JSON.parse(fs.readFileSync(vaultPath, 'utf-8'));
+            if (fs.existsSync(getVaultPath())) {
+                vault = JSON.parse(fs.readFileSync(getVaultPath(), 'utf-8'));
             }
 
             for (const line of lines) {
@@ -131,7 +131,7 @@ export function importCommand() {
                 console.log(`✅ Imported ${k}`);
             }
 
-            fs.writeFileSync(vaultPath, JSON.stringify(vault, null, 2));
+            fs.writeFileSync(getVaultPath(), JSON.stringify(vault, null, 2));
         });
 
     return cmd;

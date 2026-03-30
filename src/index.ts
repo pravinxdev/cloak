@@ -13,6 +13,12 @@ import updCommand from './commands/update';
 import { importCommand } from './commands/import';
 import { exportCommand } from './commands/export';
 import { webCommand } from './commands/web';
+import { runCommand } from './commands/run';
+import { envCommand } from './commands/env';
+import { syncCommand } from './commands/sync';
+
+
+
 const program = new Command();
 
 program
@@ -33,7 +39,10 @@ program
   .addCommand(updCommand)
   .addCommand(exportCommand())
   .addCommand(importCommand())
-  .addCommand(webCommand());
+  .addCommand(webCommand())
+  .addCommand(runCommand())
+  .addCommand(envCommand())
+  .addCommand(syncCommand());
 
 
 program.parse(process.argv);

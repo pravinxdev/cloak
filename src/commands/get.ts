@@ -2,7 +2,7 @@
 import { Command } from 'commander';
 import fs from 'fs';
 import { decrypt } from '../utils/crypto';
-import { vaultPath } from '../config/paths';
+import { getVaultPath } from '../config/paths';
 import { getSessionKey } from '../utils/session';
 
 export function getCommand() {
@@ -15,12 +15,12 @@ export function getCommand() {
         // const password = getSessionPassword();
 const keyBuf = getSessionKey();
 
-        if (!fs.existsSync(vaultPath)) {
+        if (!fs.existsSync(getVaultPath())) {
           console.log('🔐 Vault is empty.');
           return;
         }
 
-        const data = JSON.parse(fs.readFileSync(vaultPath, 'utf-8'));
+        const data = JSON.parse(fs.readFileSync(getVaultPath(), 'utf-8'));
         const encrypted = data[key];
 
         if (!encrypted) {

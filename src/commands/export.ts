@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import fs from 'fs';
 import clipboard from 'clipboardy';
-import { vaultPath } from '../config/paths';
+import { getVaultPath } from '../config/paths';
 import { decrypt } from '../utils/crypto';
 import { getSessionKey } from '../utils/session';
 
@@ -29,12 +29,12 @@ export function exportCommand() {
         return;
       }
 
-      if (!fs.existsSync(vaultPath)) {
+      if (!fs.existsSync(getVaultPath())) {
         console.log('🔐 Vault is empty.');
         return;
       }
 
-      const vault = JSON.parse(fs.readFileSync(vaultPath, 'utf-8'));
+      const vault = JSON.parse(fs.readFileSync(getVaultPath(), 'utf-8'));
 
       const keys = keyArg ? [keyArg] : Object.keys(vault);
       const lines: string[] = [];

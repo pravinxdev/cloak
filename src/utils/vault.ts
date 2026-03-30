@@ -1,11 +1,11 @@
 import fs from 'fs';
-import { vaultPath } from '../config/paths';
+import { getVaultPath } from '../config/paths';
 
 export function loadVault(): Record<string, string> {
-  if (!fs.existsSync(vaultPath)) return {};
+  if (!fs.existsSync(getVaultPath())) return {};
 
   try {
-    const raw = fs.readFileSync(vaultPath, 'utf-8');
+    const raw = fs.readFileSync(getVaultPath(), 'utf-8');
     const parsed = JSON.parse(raw);
 
     if (!parsed || typeof parsed !== 'object') {
@@ -22,7 +22,7 @@ export function loadVault(): Record<string, string> {
 
 export function saveVault(vault: Record<string, string>): void {
   try {
-    fs.writeFileSync(vaultPath, JSON.stringify(vault, null, 2), 'utf-8');
+    fs.writeFileSync(getVaultPath(), JSON.stringify(vault, null, 2), 'utf-8');
   } catch (err) {
     console.error('❌ Failed to save vault:', err);
     process.exit(1);

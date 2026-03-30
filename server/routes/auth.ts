@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { deriveKey } from '../../src/utils/crypto';
 import { createSession, clearSession } from '../../src/utils/session';
 import fs from 'fs';
-import { vaultPath } from '../../src/config/paths';
+import { getVaultPath } from '../../src/config/paths';
 import { decrypt } from '../../src/utils/crypto';
 
 const router = Router();
@@ -15,8 +15,8 @@ router.post('/login', (req, res) => {
     const key = deriveKey(password);
 
     // Validate password using vault
-    if (fs.existsSync(vaultPath)) {
-      const vault = JSON.parse(fs.readFileSync(vaultPath, 'utf-8'));
+    if (fs.existsSync(getVaultPath())) {
+      const vault = JSON.parse(fs.readFileSync(getVaultPath(), 'utf-8'));
       const firstKey = Object.keys(vault)[0];
 
       if (firstKey) {

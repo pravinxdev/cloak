@@ -2,7 +2,7 @@
 // import { Command } from 'commander';
 // import inquirer from 'inquirer';
 // import fs from 'fs';
-// import { sessionPath, vaultPath } from '../config/paths';
+// import { sessionPath, getVaultPath() } from '../config/paths';
 // import { decrypt, deriveKey } from '../utils/crypto';
 // import path from 'path'; // Add this
 
@@ -19,9 +19,9 @@
 //     ]);
 
 //     // If vault exists, try to validate password
-//     if (fs.existsSync(vaultPath)) {
+//     if (fs.existsSync(getVaultPath())) {
 //       try {
-//         const vault = JSON.parse(fs.readFileSync(vaultPath, 'utf-8'));
+//         const vault = JSON.parse(fs.readFileSync(getVaultPath(), 'utf-8'));
 
 //         const testKey = Object.keys(vault)[0];
 //         if (testKey) {
@@ -67,7 +67,7 @@
 import { Command } from 'commander';
 import inquirer from 'inquirer';
 import fs from 'fs';
-import { vaultPath } from '../config/paths';
+import { getVaultPath} from '../config/paths';
 import { decrypt, deriveKey } from '../utils/crypto';
 import { createSession } from '../utils/session';
 
@@ -86,9 +86,9 @@ export function loginCommand() {
     const key = deriveKey(password);
 
     // Validate password if vault exists
-    if (fs.existsSync(vaultPath)) {
+    if (fs.existsSync(getVaultPath())) {
       try {
-        const vault = JSON.parse(fs.readFileSync(vaultPath, 'utf-8'));
+        const vault = JSON.parse(fs.readFileSync(getVaultPath(), 'utf-8'));
         const testKey = Object.keys(vault)[0];
 
         if (testKey) {
