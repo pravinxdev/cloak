@@ -20,9 +20,9 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { api } from "@/services/api";
 
 interface Secret {
-  id: string;
   key: string;
   value: string;
 }
@@ -36,40 +36,25 @@ export default function SecretsPage() {
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
   const [deleteKey, setDeleteKey] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
+
   // ✅ fetch secrets
+  const fetchSecrets = async () => {
+    try {
+      setLoading(true);
+
+      const data = await api.getSecrets();
+
+      setSecrets(Array.isArray(data) ? data : []);
+
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to load secrets");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchSecrets = async () => {
-      try {
-        setLoading(true);
-
-        const res = await fetch("/api/secrets", {
-          method: "GET",
-          credentials: "include",
-        });
-
-        const data = await res.json();
-
-        console.log("API RESPONSE:", data);
-
-        // 🔥 handle different response formats
-        if (Array.isArray(data)) {
-          setSecrets(data);
-        } else if (data.data) {
-          setSecrets(data.data);
-        } else if (data.secrets) {
-          setSecrets(data.secrets);
-        } else {
-          setSecrets([]);
-        }
-
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to load secrets");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchSecrets();
   }, []);
 
@@ -79,10 +64,10 @@ export default function SecretsPage() {
   );
 
   // ✅ toggle reveal
-  const toggleReveal = (id: string) => {
+  const toggleReveal = (key: string) => {
     setRevealed((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      next.has(key) ? next.delete(key) : next.add(key);
       return next;
     });
   };
@@ -92,33 +77,31 @@ export default function SecretsPage() {
     navigator.clipboard.writeText(value);
     toast.success("Copied to clipboard");
   };
+
+  // ✅ delete
   const confirmDelete = async () => {
     if (!deleteKey) return;
 
     try {
-      const res = await fetch(`/api/secrets/${deleteKey}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      if (!res.ok) throw new Error("Delete failed");
+      await api.deleteSecret(deleteKey);
 
       setSecrets((prev) => prev.filter((s) => s.key !== deleteKey));
 
       toast.success("Secret deleted");
 
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error("Failed to delete");
+      toast.error(err.message || "Failed to delete");
     } finally {
       setOpenDialog(false);
       setDeleteKey(null);
     }
   };
+
   return (
     <div className="max-w-full space-y-4">
 
-      {/* 🔍 Search + Add */}
+      {/* Search + Add */}
       <div className="flex items-center justify-between gap-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -135,7 +118,7 @@ export default function SecretsPage() {
         </Button>
       </div>
 
-      {/* 📋 Table */}
+      {/* Table */}
       <div className="border border-border rounded-lg overflow-hidden">
         <table className="w-full text-sm">
           <thead>
@@ -181,7 +164,7 @@ export default function SecretsPage() {
                         <Copy size={14} />
                       </Button>
 
-                      <Button size="icon" variant="ghost" onClick={() => navigate("/edit/", { state: { secret } })}>
+                      <Button size="icon" variant="ghost" onClick={() => navigate("/add", { state: { secret } })}>
                         <Pencil size={14} />
                       </Button>
 
@@ -192,7 +175,8 @@ export default function SecretsPage() {
                         onClick={() => {
                           setDeleteKey(secret.key);
                           setOpenDialog(true);
-                        }}                      >
+                        }}
+                      >
                         <Trash2 size={14} />
                       </Button>
 
@@ -204,37 +188,31 @@ export default function SecretsPage() {
           </tbody>
         </table>
       </div>
+
+      {/* Delete Dialog */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Secret</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete{" "}
-              <span className="font-mono font-semibold">
-                {deleteKey}
-              </span>
-              ? This action cannot be undone.
+              <span className="font-mono font-semibold">{deleteKey}</span>?
             </DialogDescription>
           </DialogHeader>
 
           <DialogFooter className="flex gap-2 justify-end">
-            <Button
-              variant="ghost"
-              onClick={() => setOpenDialog(false)}
-            >
+            <Button variant="ghost" onClick={() => setOpenDialog(false)}>
               Cancel
             </Button>
 
-            <Button
-              variant="destructive"
-              onClick={confirmDelete}
-            >
+            <Button variant="destructive" onClick={confirmDelete}>
               Delete
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      {/* 🔢 Count */}
+
+      {/* Count */}
       {!loading && (
         <p className="text-xs text-muted-foreground">
           {filtered.length} secret{filtered.length !== 1 ? "s" : ""}

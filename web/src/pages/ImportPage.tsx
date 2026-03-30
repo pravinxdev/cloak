@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { api } from "@/services/api";
 
 interface Secret {
   key: string;
@@ -46,23 +47,16 @@ export default function ImportPage() {
         return;
       }
 
-      // 🔥 get existing secrets (for skip mode)
       let existingKeys: string[] = [];
 
+      // 🔥 Skip mode → fetch existing keys
       if (mode === "skip") {
-        const res = await fetch("/api/secrets", {
-          credentials: "include",
-        });
-
-        const data = await res.json();
-        const secrets = Array.isArray(data)
-          ? data
-          : data.data || data.secrets || [];
-
-        existingKeys = secrets.map((s: any) => s.key);
+        const secrets = await api.getSecrets();
+        existingKeys = secrets.map((s: Secret) => s.key);
       }
 
       let count = 0;
+      let failed: string[] = [];
 
       // 🔥 import one by one
       for (const item of parsed) {
@@ -70,26 +64,28 @@ export default function ImportPage() {
           continue;
         }
 
-        const res = await fetch("/api/secrets", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify(item),
-        });
-
-        if (res.ok) {
+        try {
+          await api.addSecret(item.key, item.value);
           count++;
+        } catch (err) {
+          console.error("Failed:", item.key);
+          failed.push(item.key);
         }
       }
 
+      // ✅ success message
       toast.success(`Imported ${count} secret${count !== 1 ? "s" : ""}`);
+
+      // ⚠️ partial failure message
+      if (failed.length > 0) {
+        toast.warning(`${failed.length} failed`);
+      }
+
       setText("");
 
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error("Import failed");
+      toast.error(err.message || "Import failed");
     } finally {
       setLoading(false);
     }

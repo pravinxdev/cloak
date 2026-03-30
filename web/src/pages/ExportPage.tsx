@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Copy, Download, EyeOff, Eye } from "lucide-react";
 import { toast } from "sonner";
+import { api } from "@/services/api";
 
 interface Secret {
   key: string;
@@ -13,32 +14,19 @@ export default function ExportPage() {
   const [loading, setLoading] = useState(false);
   const [masked, setMasked] = useState(true);
 
-  // ✅ fetch secrets
+  // ✅ fetch secrets using api.ts
   useEffect(() => {
     const fetchSecrets = async () => {
       try {
         setLoading(true);
 
-        const res = await fetch("/api/secrets", {
-          method: "GET",
-          credentials: "include",
-        });
+        const data = await api.getSecrets();
 
-        const data = await res.json();
+        setSecrets(Array.isArray(data) ? data : []);
 
-        if (Array.isArray(data)) {
-          setSecrets(data);
-        } else if (data.data) {
-          setSecrets(data.data);
-        } else if (data.secrets) {
-          setSecrets(data.secrets);
-        } else {
-          setSecrets([]);
-        }
-
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
-        toast.error("Failed to load secrets");
+        toast.error(err.message || "Failed to load secrets");
       } finally {
         setLoading(false);
       }
