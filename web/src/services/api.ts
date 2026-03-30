@@ -1,45 +1,64 @@
 const BASE_URL = '/api';
 
+async function request(path: string, options: any = {}) {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    ...options,
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error || 'Something went wrong');
+  }
+
+  return data;
+}
+
 export const api = {
-  login: async (password: string) => {
-    return fetch(`${BASE_URL}/login`, {
+  login: (password: string) =>
+    request('/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ password }),
-    });
-  },
+    }),
 
-  logout: async () => {
-    return fetch(`${BASE_URL}/logout`, { method: 'POST' });
-  },
+  logout: () =>
+    request('/logout', { method: 'POST' }),
 
-  getSecrets: async () => {
-    return fetch(`${BASE_URL}/secrets`);
-  },
+  getSecrets: () =>
+    request('/secrets'),
 
-  addSecret: async (key: string, value: string) => {
-    return fetch(`${BASE_URL}/secrets`, {
+  addSecret: (key: string, value: string) =>
+    request('/secrets', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key, value }),
-    });
-  },
+    }),
 
-  deleteSecret: async (key: string) => {
-    return fetch(`${BASE_URL}/secrets/${key}`, {
+  deleteSecret: (key: string) =>
+    request(`/secrets/${key}`, {
       method: 'DELETE',
-    });
-  },
+    }),
 
-  exportSecrets: async () => {
-    return fetch(`${BASE_URL}/export`);
-  },
+  exportSecrets: () =>
+    request('/export'),
 
-  importSecrets: async (data: string) => {
-    return fetch(`${BASE_URL}/import`, {
+  importSecrets: (data: string) =>
+    request('/import', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ data }),
-    });
-  },
+    }),
+
+  setEnv: (env: string) =>
+    request('/env', {
+      method: 'POST',
+      body: JSON.stringify({ env }),
+    }),
+
+  runCommand: (command: string) =>
+    request('/run', {
+      method: 'POST',
+      body: JSON.stringify({ command }),
+    }),
 };
