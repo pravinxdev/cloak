@@ -130,4 +130,10 @@ export const api = {
     request("/secrets", {
       method: "DELETE",
     }),
+
+  changePassword: (oldPassword: string, newPassword: string) =>
+  request('/change-password', {
+    method: 'POST',
+    body: JSON.stringify({ oldPassword, newPassword }),
+  }),
 };

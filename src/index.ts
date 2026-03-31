@@ -16,6 +16,7 @@ import { webCommand } from './commands/web';
 import { runCommand } from './commands/run';
 import { envCommand } from './commands/env';
 import { syncCommand } from './commands/sync';
+import { changePasswordCommand } from './commands/change-password';
 
 
 
@@ -42,7 +43,8 @@ program
   .addCommand(webCommand())
   .addCommand(runCommand())
   .addCommand(envCommand())
-  .addCommand(syncCommand());
+  .addCommand(syncCommand())
+  .addCommand(changePasswordCommand());
 
 
 program.parse(process.argv);
