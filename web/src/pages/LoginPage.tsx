@@ -83,7 +83,7 @@ import { Input } from "@/components/ui/input";
 import { KeyRound } from "lucide-react";
 
 export default function LoginPage() {
-  const { login } = useApp();
+  const { login, fetchSessionKey } = useApp();
 
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -113,6 +113,12 @@ export default function LoginPage() {
 
       // ✅ update app state
       login();
+      console.log('✅ Logged in, updating app state');
+
+      // ✅ fetch session key for frontend decryption
+      console.log('🔑 Fetching session key...');
+      await fetchSessionKey();
+      console.log('✅ Session key fetched and stored in context');
 
     } catch (err: any) {
       setError(err.message || "Invalid password");

@@ -97,16 +97,25 @@ export function getSessionKey(): Buffer {
     throw new Error('Please login first');
   }
 
-  const session = JSON.parse(fs.readFileSync(sessionPath, 'utf-8'));
+  try {
+    const session = JSON.parse(fs.readFileSync(sessionPath, 'utf-8'));
 
-  const now = Date.now();
+    if (!session.key) {
+      throw new Error('Invalid session: session key is missing');
+    }
 
-  if (!session.createdAtTimestamp || now - session.createdAtTimestamp > 30 * 60 * 1000) {
-    fs.unlinkSync(sessionPath);
-    throw new Error('Session expired. Please login again.');
+    const now = Date.now();
+
+    if (!session.createdAtTimestamp || now - session.createdAtTimestamp > 30 * 60 * 1000) {
+      fs.unlinkSync(sessionPath);
+      throw new Error('Session expired. Please login again.');
+    }
+
+    return Buffer.from(session.key, 'hex');
+  } catch (err: any) {
+    if (err.message.includes('Session')) throw err;
+    throw new Error('Failed to load session: ' + err.message);
   }
-
-  return Buffer.from(session.key, 'hex');
 }
 
 // ℹ️ Session info

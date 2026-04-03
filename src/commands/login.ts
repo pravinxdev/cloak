@@ -70,6 +70,7 @@ import fs from 'fs';
 import { getVaultPath} from '../config/paths';
 import { decrypt, deriveKey } from '../utils/crypto';
 import { createSession } from '../utils/session';
+import { loadVault, getSecretValue } from '../utils/vault';
 
 export function loginCommand() {
   const cmd = new Command('login');
@@ -88,11 +89,12 @@ export function loginCommand() {
     // Validate password if vault exists
     if (fs.existsSync(getVaultPath())) {
       try {
-        const vault = JSON.parse(fs.readFileSync(getVaultPath(), 'utf-8'));
+        const vault = loadVault();
         const testKey = Object.keys(vault)[0];
 
         if (testKey) {
-          decrypt(vault[testKey], key);
+          const encrypted = getSecretValue(vault, testKey);
+          if (encrypted) decrypt(encrypted, key);
         }else{
           console.log('🔐 Vault is empty. Creating new session.');
         }

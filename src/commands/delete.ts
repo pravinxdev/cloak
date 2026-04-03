@@ -1,8 +1,8 @@
 import { Command } from 'commander';
 import fs from 'fs';
 import { getVaultPath } from '../config/paths';
-import { loadVault } from '../utils/vault';
-import { getSession } from '../utils/session';
+import { loadVault, saveVault } from '../utils/vault';
+import { getSessionKey } from '../utils/session';
 
 export function deleteCommand(): Command {
   const command = new Command('del');
@@ -11,8 +11,9 @@ export function deleteCommand(): Command {
     .arguments('<key>')
     .description('Delete a secret key from the vault')
     .action((key: string) => {
-      const session = getSession();
-      if (!session) {
+      try {
+        getSessionKey();
+      } catch (err) {
         console.log('❌ Please login first using `cloakx login`.');
         return;
       }
@@ -26,10 +27,10 @@ export function deleteCommand(): Command {
       delete vault[key];
 
       try {
-        fs.writeFileSync(getVaultPath(), JSON.stringify(vault, null, 2));
+        saveVault(vault);
         console.log(`🗑️  Key "${key}" has been deleted.`);
       } catch (err) {
-        console.error('⚠️ Failed to update vault:', err);
+        console.error('⚠️ Failed to delete secret:', err);
       }
     });
 

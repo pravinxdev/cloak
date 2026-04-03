@@ -44,6 +44,7 @@
     "commander": "^14.0.0",
     "concurrently": "^9.2.1",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.3.2",
     "inquirer": "^12.8.2",
     "open": "^11.0.0",
     "readline-sync": "^1.4.10"

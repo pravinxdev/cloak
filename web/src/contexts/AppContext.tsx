@@ -168,10 +168,13 @@ interface AppState {
   secrets: Secret[];
   environments: Environment[];
   activeEnvironment: string;
+  needsRecovery: boolean;
+  sessionKey: string; // 🔐 Base64-encoded session key for frontend decryption
 
   loadingSecrets: boolean;
   fetchSecrets: () => Promise<void>;
-
+  fetchEnvironments: () => Promise<void>;
+  fetchSessionKey: () => Promise<void>; // 🔐 Fetch session key from backend
 
   login: () => void;
   logout: () => void;
@@ -181,8 +184,8 @@ interface AppState {
   deleteSecret: (id: string) => void;
   importSecrets: (text: string, mode: "overwrite" | "skip") => number;
 
-  addEnvironment: (name: string) => void;
-  switchEnvironment: (id: string) => void;
+  addEnvironment: (name: string) => Promise<void>;
+  switchEnvironment: (id: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -199,9 +202,11 @@ const INITIAL_ENVS: Environment[] = [
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [secrets, setSecrets] = useState<Secret[]>();
+  const [secrets, setSecrets] = useState<Secret[]>([]);
   const [environments, setEnvironments] = useState<Environment[]>(INITIAL_ENVS);
-const [loadingSecrets, setLoadingSecrets] = useState(false);
+  const [needsRecovery, setNeedsRecovery] = useState(false);
+  const [loadingSecrets, setLoadingSecrets] = useState(false);
+  const [sessionKey, setSessionKey] = useState<string>(""); // 🔐 Store base64 session key
 
   const activeEnvironment =
     environments.find((e) => e.active)?.name || "development";
@@ -212,38 +217,122 @@ const [loadingSecrets, setLoadingSecrets] = useState(false);
     setIsLoggedIn(loggedIn);
   }, []);
 
+  // ✅ Fetch environments from API
+  const fetchEnvironments = useCallback(async () => {
+    try {
+      const res = await fetch("/api/environments", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch environments");
+      }
+
+      const data = await res.json();
+      
+      // 🔥 Backend now returns { environments: string[], activeEnvironment: string }
+      const envList = Array.isArray(data) ? data : (data.environments || []);
+      const activeEnv = typeof data === 'object' && data.activeEnvironment ? data.activeEnvironment : envList[0];
+      
+      // Convert to Environment objects
+      const envs: Environment[] = envList.map((name: string) => ({
+        id: name,
+        name,
+        active: name === activeEnv,
+      }));
+      setEnvironments(envs.length > 0 ? envs : INITIAL_ENVS);
+    } catch (err) {
+      console.error("Error fetching environments", err);
+      // fallback to initial envs
+      setEnvironments(INITIAL_ENVS);
+    }
+  }, []);
+
+  // ✅ Fetch session key from API
+  const fetchSessionKey = useCallback(async () => {
+    try {
+      console.log('🔑 Fetching session key...');
+      const res = await fetch("/api/session-key", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch session key");
+      }
+
+      const data = await res.json();
+      console.log('✅ Session key fetched (base64):', data.sessionKey?.substring(0, 30) + '...');
+      setSessionKey(data.sessionKey || "");
+      console.log('✅ Session key stored in context state');
+    } catch (err) {
+      console.error("❌ Error fetching session key", err);
+    }
+  }, []);
+
   // ✅ login (state only)
   const login = useCallback(() => {
     setIsLoggedIn(true);
   }, []);
-const fetchSecrets = useCallback(async () => {
-  try {
-    setLoadingSecrets(true);
 
-    const res = await fetch("/api/secrets", {
-      method: "GET",
-      credentials: "include",
-    });
+  // ✅ Fetch secrets from API
+  const fetchSecrets = useCallback(async () => {
+    try {
+      setLoadingSecrets(true);
+      setNeedsRecovery(false);
 
-    if (!res.ok) {
-      throw new Error("Failed to fetch secrets");
+      const res = await fetch("/api/secrets", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        if (res.status === 401 && errorText.includes("bad decrypt")) {
+          setNeedsRecovery(true);
+          return;
+        }
+        throw new Error("Failed to fetch secrets");
+      }
+
+      const data = await res.json();
+      
+      // 🔥 Convert API response to Secret[] format (add id field)
+      const secrets: Secret[] = (Array.isArray(data) ? data : []).map((item: any) => ({
+        id: item.key,  // Use key as id
+        key: item.key,
+        value: item.value,
+        // metadata is kept in item but not in Secret type
+      }));
+      
+      setSecrets(secrets);
+      setNeedsRecovery(false);
+
+    } catch (err: any) {
+      console.error("Error fetching secrets", err);
+      // Check if error message contains "bad decrypt"
+      if (err.message && err.message.includes("bad decrypt")) {
+        setNeedsRecovery(true);
+      }
+    } finally {
+      setLoadingSecrets(false);
     }
+  }, []);
 
-    const data = await res.json();
+  // ✅ Load environments and session key on mount
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchEnvironments();
+      fetchSecrets();
+      fetchSessionKey(); // 🔐 Also fetch session key for frontend decryption
+    }
+  }, [isLoggedIn, fetchEnvironments, fetchSecrets, fetchSessionKey]);
 
-    // adjust if your API wraps response
-    setSecrets(data);
-
-  } catch (err) {
-    console.error("Error fetching secrets", err);
-  } finally {
-    setLoadingSecrets(false);
-  }
-}, []);
   // ✅ logout with API
-const logout = useCallback(async () => {
-  try {
-    await fetch("/api/logout", {
+  const logout = useCallback(async () => {
+    try {
+      await fetch("/api/logout", {
       method: "POST",
       credentials: "include",
     });
@@ -253,10 +342,8 @@ const logout = useCallback(async () => {
 
   // ✅ clear everything regardless of API result
   setIsLoggedIn(false);
+  setSecrets([]);
   localStorage.removeItem("cloakx_logged_in");
-
-  // ✅ redirect to login page
-  // window.location.href = "/login";
 
 }, []);  const addSecret = useCallback((key: string, value: string) => {
     setSecrets((prev) => [
@@ -326,18 +413,48 @@ const logout = useCallback(async () => {
     []
   );
 
-  const addEnvironment = useCallback((name: string) => {
-    setEnvironments((prev) => [
-      ...prev,
-      { id: Date.now().toString(), name, active: false },
-    ]);
-  }, []);
+  const addEnvironment = useCallback(async (name: string) => {
+    try {
+      const res = await fetch("/api/environments", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name })
+      });
 
-  const switchEnvironment = useCallback((id: string) => {
-    setEnvironments((prev) =>
-      prev.map((e) => ({ ...e, active: e.id === id }))
-    );
-  }, []);
+      if (!res.ok) {
+        throw new Error("Failed to create environment");
+      }
+
+      // Refresh environments list
+      await fetchEnvironments();
+    } catch (err) {
+      console.error("Error adding environment", err);
+    }
+  }, [fetchEnvironments]);
+
+  const switchEnvironment = useCallback(async (id: string) => {
+    try {
+      const env = environments.find(e => e.id === id);
+      if (!env) return;
+
+      const res = await fetch("/api/environments/switch", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ environment: env.name })
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to switch environment");
+      }
+
+      // Refresh environments list to get updated active status
+      await fetchEnvironments();
+    } catch (err) {
+      console.error("Error switching environment", err);
+    }
+  }, [environments, fetchEnvironments]);
 
   return (
     <AppContext.Provider
@@ -346,8 +463,12 @@ const logout = useCallback(async () => {
         secrets,
         environments,
         activeEnvironment,
+        sessionKey,
+        needsRecovery,
         loadingSecrets,
         fetchSecrets,
+        fetchEnvironments,
+        fetchSessionKey,
 
         login,
         logout,
@@ -369,3 +490,5 @@ export function useApp() {
   if (!ctx) throw new Error("useApp must be used within AppProvider");
   return ctx;
 }
+
+export { AppContext };

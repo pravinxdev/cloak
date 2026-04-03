@@ -12,14 +12,18 @@ import ImportPage from "@/pages/ImportPage";
 import EnvironmentsPage from "@/pages/EnvironmentsPage";
 import RunCommandPage from "@/pages/RunCommandPage";
 import SettingsPage from "@/pages/SettingsPage";
+import RecoveryPage from "@/pages/RecoveryPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
 function AppRoutes() {
-  const { isLoggedIn } = useApp();
+  const { isLoggedIn, needsRecovery } = useApp();
 
   if (!isLoggedIn) return <LoginPage />;
+
+  // Show recovery page if vaults need recovery
+  if (needsRecovery) return <RecoveryPage />;
 
   return (
     <Routes>

@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import readlineSync from 'readline-sync';
-import { loadVault, saveVault } from '../utils/vault';
+import { loadVault, saveVault, getSecretValue, updateSecret } from '../utils/vault';
 import { encrypt, decrypt, deriveKey } from '../utils/crypto';
 
 export function changePasswordCommand() {
@@ -21,7 +21,8 @@ export function changePasswordCommand() {
       const firstKey = Object.keys(vault)[0];
       if (firstKey) {
         try {
-          decrypt(vault[firstKey], oldKey);
+          const encrypted = getSecretValue(vault, firstKey);
+          if (encrypted) decrypt(encrypted, oldKey);
         } catch {
           console.log('❌ Incorrect current password');
           return;
@@ -44,11 +45,14 @@ export function changePasswordCommand() {
 
       // 🔁 Re-encrypt all secrets
       const newKey = deriveKey(newPassword);
-      const updatedVault: Record<string, string> = {};
+      const updatedVault = { ...vault };
 
       for (const key of Object.keys(vault)) {
-        const decrypted = decrypt(vault[key], oldKey);
-        updatedVault[key] = encrypt(decrypted, newKey);
+        const encrypted = getSecretValue(vault, key);
+        if (encrypted) {
+          const decrypted = decrypt(encrypted, oldKey);
+          updateSecret(updatedVault, key, encrypt(decrypted, newKey));
+        }
       }
 
       saveVault(updatedVault);

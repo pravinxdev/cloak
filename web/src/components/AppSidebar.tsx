@@ -21,7 +21,7 @@ const navItems = [
 
 export function AppSidebar() {
   const location = useLocation();
-  const { logout } = useApp();
+  const { logout, activeEnvironment } = useApp();
   
 
   return (
@@ -49,7 +49,12 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="p-2">
+      <SidebarFooter className="p-2 space-y-2">
+        <SidebarMenu>
+          <SidebarMenuItem className="text-xs text-muted-foreground px-3 py-2">
+            Active Environment: <span className="font-semibold text-foreground">{activeEnvironment}</span>
+          </SidebarMenuItem>
+        </SidebarMenu>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton

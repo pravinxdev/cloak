@@ -135,23 +135,71 @@
 //     </div>
 //   );
 // }
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { api } from "@/services/api";
+import { TagInput } from "@/components/TagInput";
+import { EnvironmentSelector } from "@/components/EnvironmentSelector";
+import { ExpirationPicker } from "@/components/ExpirationPicker";
+import { useApp } from "@/contexts/AppContext";
+import { decryptValue } from "@/utils/decrypt";
 
 export default function AddSecretPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const appContext = useApp();
 
   const existing = location.state?.secret;
   const isEdit = !!existing;
 
-  const [key, setKey] = useState(existing?.key || "");
-  const [value, setValue] = useState(existing?.value || "");
+  // 🔥 Extract base key from composite key (e.g., "TESTINGNEW@production" -> "TESTINGNEW")
+  const baseKey = existing?.key ? existing.key.split('@')[0] : '';
+  const existingEnv = existing?.environment || "default";
+
+  const [key, setKey] = useState(baseKey);
+  const [value, setValue] = useState("");
+  const [tags, setTags] = useState<string[]>(existing?.tags || []);
+  const [environment, setEnvironment] = useState(existingEnv);
+  const [expires, setExpires] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [decrypting, setDecrypting] = useState(isEdit); // 🔐 Track if still decrypting
+
+  // 🌍 Auto-select active environment on mount (only for new secrets)
+  useEffect(() => {
+    if (!isEdit && appContext?.activeEnvironment && environment === "default") {
+      setEnvironment(appContext.activeEnvironment);
+    }
+  }, [isEdit, appContext?.activeEnvironment]);
+
+  // 🔐 Decrypt value when editing
+  useEffect(() => {
+    if (!isEdit || !existing?.value || !appContext?.sessionKey) {
+      setDecrypting(false);
+      return;
+    }
+
+    const decryptExistingValue = async () => {
+      try {
+        const decrypted = await decryptValue(existing.value, appContext.sessionKey);
+        setValue(decrypted);
+        
+        // 🔥 Also load expiration when editing
+        if (existing.expiresAt) {
+          setExpires(existing.expiresAt.toString());
+        }
+      } catch (err: any) {
+        console.error("Failed to decrypt value:", err);
+        toast.error("Failed to decrypt secret value");
+      } finally {
+        setDecrypting(false);
+      }
+    };
+
+    decryptExistingValue();
+  }, [isEdit, existing?.value, existing?.expiresAt, appContext?.sessionKey]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -164,13 +212,33 @@ export default function AddSecretPage() {
     try {
       setLoading(true);
 
-      // 🔥 if key changed → delete old key
-      if (isEdit && existing.key !== key) {
-        await api.deleteSecret(existing.key);
+      // 🔥 if key changed → delete old key from any environment
+      if (isEdit && baseKey !== key) {
+        await api.deleteSecret(baseKey);
       }
 
-      // 🔥 add / update
-      await api.addSecret(key, value);
+      // 🔥 if environment changed during edit → delete from old environment first
+      // But ignore "key not found" errors since it might already be moved
+      if (isEdit && baseKey === key && existingEnv !== environment) {
+        try {
+          await api.deleteSecret(baseKey);
+        } catch (err: any) {
+          // Ignore "key not found" error - it's OK if the secret was already moved
+          if (!err.message?.includes("not found")) {
+            throw err;
+          }
+        }
+      }
+
+      // 🔥 add / update with metadata
+      const metadata = {
+        tags: tags.length > 0 ? tags : undefined,
+        environment: environment,
+        expires: expires || undefined,
+      };
+
+      
+      await api.addSecret(key, value, metadata);
 
       toast.success(isEdit ? "Secret updated" : "Secret added");
 
@@ -178,8 +246,6 @@ export default function AddSecretPage() {
 
     } catch (err: any) {
       console.error(err);
-
-      // 🔥 message comes from api.ts
       toast.error(err.message || "Save failed");
 
     } finally {
@@ -197,8 +263,8 @@ export default function AddSecretPage() {
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
           {isEdit
-            ? "Update the key-value pair below."
-            : "Add a new key-value pair to your vault."}
+            ? "Update the key-value pair and metadata below."
+            : "Add a new key-value pair to your vault with optional metadata."}
         </p>
       </div>
 
@@ -214,12 +280,12 @@ export default function AddSecretPage() {
             onChange={(e) =>
               setKey(
                 e.target.value
-                  .toUpperCase()
-                  .replace(/[^A-Z0-9_]/g, "")
+                  .replace(/[^a-zA-Z0-9_-]/g, "")
               )
             }
             className="bg-secondary border-border font-mono text-sm"
-            disabled={loading}
+            disabled={loading || isEdit}
+            title={isEdit ? "Key cannot be changed during edit" : ""}
           />
         </div>
 
@@ -231,14 +297,38 @@ export default function AddSecretPage() {
             value={value}
             onChange={(e) => setValue(e.target.value)}
             className="bg-secondary border-border font-mono text-sm"
-            disabled={loading}
+            disabled={loading || decrypting}
           />
+        </div>
+
+        {/* Tags */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium"></label>
+          <TagInput tags={tags} onChange={setTags} />
+        </div>
+
+        {/* Environment */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium"></label>
+          <EnvironmentSelector 
+            value={environment} 
+            onChange={setEnvironment}
+            environments={appContext?.environments?.map(e => e.name) || ["default"]}
+          />
+        </div>
+
+        {/* Expiration */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium"></label>
+          <ExpirationPicker value={expires} onChange={setExpires} />
         </div>
 
         {/* Actions */}
         <div className="flex gap-2">
-          <Button type="submit" disabled={loading}>
-            {loading
+          <Button type="submit" disabled={loading || decrypting}>
+            {decrypting
+              ? "Decrypting..."
+              : loading
               ? "Saving..."
               : isEdit
               ? "Update"

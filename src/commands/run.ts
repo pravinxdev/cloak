@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { spawn } from 'child_process';
-import { loadVault } from '../utils/vault';
+import { loadVault, getSecretValue } from '../utils/vault';
 import { decrypt } from '../utils/crypto';
 import { getSessionKey } from '../utils/session';
 
@@ -19,7 +19,8 @@ export function runCommand() {
         const envVars: Record<string, string> = {};
 
         for (const k of Object.keys(vault)) {
-          envVars[k] = decrypt(vault[k], key);
+          const encrypted = getSecretValue(vault, k);
+          if (encrypted) envVars[k] = decrypt(encrypted, key);
         }
 
         // 🧠 Merge with existing env

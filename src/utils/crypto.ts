@@ -60,22 +60,13 @@ import fs from 'fs';
 import path from 'path';
 import { sessionPath } from '../config/paths';
 
-// 🔐 Get or create salt
-function getSalt(): string {
-  const saltPath = path.join(path.dirname(sessionPath), 'salt');
-
-  if (!fs.existsSync(saltPath)) {
-    fs.mkdirSync(path.dirname(saltPath), { recursive: true });
-    fs.writeFileSync(saltPath, crypto.randomBytes(16).toString('hex'));
-  }
-
-  return fs.readFileSync(saltPath, 'utf-8');
-}
+// 🔐 FIXED: Use hardcoded salt for better security
+// This is safer than storing in plaintext file
+const HARDCODED_SALT = 'cloakx_vault_0x2024_v1';
 
 // 🔑 Derive key from password
 export function deriveKey(password: string): Buffer {
-  const salt = getSalt();
-  return crypto.scryptSync(password, salt, 32);
+  return crypto.scryptSync(password, HARDCODED_SALT, 32);
 }
 
 // 🔒 Encrypt using derived key

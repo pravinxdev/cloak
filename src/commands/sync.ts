@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import fs from 'fs';
-import { loadVault } from '../utils/vault';
+import { loadVault, getSecretValue } from '../utils/vault';
 import { decrypt } from '../utils/crypto';
 import { getSessionKey } from '../utils/session';
 
@@ -15,8 +15,11 @@ export function syncCommand() {
       let content = '';
 
       for (const k of Object.keys(vault)) {
-        const value = decrypt(vault[k], key);
-        content += `${k}=${value}\n`;
+        const encrypted = getSecretValue(vault, k);
+        if (encrypted) {
+          const value = decrypt(encrypted, key);
+          content += `${k}=${value}\n`;
+        }
       }
 
       fs.writeFileSync('.env', content);

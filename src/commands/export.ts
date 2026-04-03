@@ -1,9 +1,9 @@
 import { Command } from 'commander';
 import fs from 'fs';
 import clipboard from 'clipboardy';
-import { getVaultPath } from '../config/paths';
 import { decrypt } from '../utils/crypto';
 import { getSessionKey } from '../utils/session';
+import { loadVault, getSecretValue } from '../utils/vault';
 
 function maskValue(value: string): string {
   if (value.length <= 4) return '****';
@@ -29,18 +29,18 @@ export function exportCommand() {
         return;
       }
 
-      if (!fs.existsSync(getVaultPath())) {
+      const vault = loadVault();
+      if (!vault || Object.keys(vault).length === 0) {
         console.log('🔐 Vault is empty.');
         return;
       }
-
-      const vault = JSON.parse(fs.readFileSync(getVaultPath(), 'utf-8'));
 
       const keys = keyArg ? [keyArg] : Object.keys(vault);
       const lines: string[] = [];
 
       for (const k of keys) {
-        if (!vault[k]) {
+        const encrypted = getSecretValue(vault, k);
+        if (!encrypted) {
           console.log(`❌ No such key: ${k}`);
           continue;
         }
@@ -48,7 +48,7 @@ export function exportCommand() {
         if (k.startsWith('__')) continue; // skip internal keys
 
         try {
-          let value = decrypt(vault[k], key);
+          let value = decrypt(encrypted, key);
 
           if (options.masked) {
             value = maskValue(value);

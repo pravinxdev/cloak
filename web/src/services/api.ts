@@ -69,6 +69,7 @@ async function request(path: string, options: any = {}) {
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',  // ✅ FIXED: Include cookies for session management
     ...options,
   });
 
@@ -79,6 +80,15 @@ async function request(path: string, options: any = {}) {
   }
 
   return data;
+}
+
+// 📊 Types for metadata
+export interface SecretData {
+  key: string;
+  value: string;
+  tags?: string[];
+  environment?: string;
+  expiresAt?: number;
 }
 
 export const api = {
@@ -94,10 +104,16 @@ export const api = {
   getSecrets: () =>
     request('/secrets'),
 
-  addSecret: (key: string, value: string) =>
+  addSecret: (key: string, value: string, metadata?: { tags?: string[]; environment?: string; expires?: string }) =>
     request('/secrets', {
       method: 'POST',
-      body: JSON.stringify({ key, value }),
+      body: JSON.stringify({ 
+        key, 
+        value,
+        tags: metadata?.tags,
+        environment: metadata?.environment,
+        expires: metadata?.expires
+      }),
     }),
 
   deleteSecret: (key: string) =>
@@ -126,14 +142,21 @@ export const api = {
       body: JSON.stringify({ command }),
     }),
 
-  clearVault: () =>
+  clearVault: (environment?: string) =>
     request("/secrets", {
       method: "DELETE",
+      body: environment ? JSON.stringify({ environment }) : undefined,
     }),
 
   changePassword: (oldPassword: string, newPassword: string) =>
-  request('/change-password', {
-    method: 'POST',
-    body: JSON.stringify({ oldPassword, newPassword }),
-  }),
+    request('/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ oldPassword, newPassword }),
+    }),
+
+  recoverVaults: (oldPassword: string) =>
+    request('/recover-vaults', {
+      method: 'POST',
+      body: JSON.stringify({ oldPassword }),
+    }),
 };
