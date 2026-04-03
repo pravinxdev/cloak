@@ -964,7 +964,7 @@ A: Yes! Export/import secrets or use the Web UI for team access on the same mach
 
 ### **Social**
 - 🐙 **GitHub**: [@pravinxdev](https://github.com/pravinxdev)
-- 🐦 **Twitter**: [@pravinxdev](https://twitter.com/pravinxdev)
+- 🐦 **LinkedIn**: [@pravindev](https://www.linkedin.com/in/pravindev/)
 
 ---
 
