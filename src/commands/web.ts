@@ -53,18 +53,24 @@ export function webCommand() {
     const fs = require("fs");
     let distPath: string | null = null;
 
-    // 1. Check if public folder exists (production npm package)
-    const publicPath = path.join(__dirname, "..", "..", "public");
+    // Resolve from compiled location: dist/src/commands/web.js
+    // If globally installed, __dirname = node_modules/cloakx/dist/src/commands
+    // We need to go up to the package root: ../../../public
+
+    // 1. Check if public folder exists in package root (production npm package)
+    const publicPath = path.resolve(__dirname, "..", "..", "..", "public");
     if (fs.existsSync(publicPath)) {
       distPath = publicPath;
       console.log("✅ Using pre-built web assets (production mode)");
     }
 
-    // 2. Check if web/dist exists (development with built web)
-    const webDistPath = path.join(process.cwd(), "web", "dist");
-    if (!distPath && fs.existsSync(webDistPath)) {
-      distPath = webDistPath;
-      console.log("✅ Using web/dist (development mode)");
+    // 2. Check if web/dist exists in development (current working directory)
+    if (!distPath) {
+      const webDistPath = path.join(process.cwd(), "web", "dist");
+      if (fs.existsSync(webDistPath)) {
+        distPath = webDistPath;
+        console.log("✅ Using web/dist (development mode)");
+      }
     }
 
     // 3. If neither exists and web folder is available, build it
@@ -89,7 +95,7 @@ export function webCommand() {
             stdio: "inherit",
           });
           console.log("✅ Build completed");
-          distPath = webDistPath;
+          distPath = path.join(webPath, "dist");
         } catch (err) {
           console.error("❌ Frontend build failed");
           process.exit(1);
