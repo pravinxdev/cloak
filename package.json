@@ -1,13 +1,14 @@
 {
   "name": "cloakx",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Cloakx is a secure, lightweight CLI tool to manage your development secrets locally — no cloud, no hassle. Store, retrieve, and manage secrets across projects with encryption and ease. 🔐 Perfect for solo devs, indie hackers, and teams who value speed, simplicity, and security.",
   "main": "index.js",
   "bin": {
     "cloakx": "./dist/src/index.js"
   },
   "scripts": {
-    "build": "tsc",
+    "prebuild": "npm --prefix web install",
+    "build": "npm --prefix web run build && node scripts/copy-web-dist.js && tsc",
     "dev:server": "npx ts-node server/index.ts",
     "dev:web": "npm --prefix web run dev",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:web\""
@@ -17,6 +18,7 @@
   },
   "files": [
     "dist",
+    "public",
     "README.md"
   ],
   "repository": {

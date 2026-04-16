@@ -49,26 +49,61 @@ export function webCommand() {
     const app = express();
     let PORT = 1201;  // Frontend port (less commonly used)
 
-    try {
-      console.log("📦 Installing web dependencies...");
-      try {
-        execSync("npm install", {
-          cwd: path.join(process.cwd(), "web"),
-          stdio: "inherit",
-        });
-        console.log("✅ Dependencies installed");
-      } catch (err) {
-        console.error("⚠️  Warning: Could not install web dependencies");
-      }
+    // 🔍 Determine where to serve frontend from
+    const fs = require("fs");
+    let distPath: string | null = null;
 
-      console.log("⚙️ Building frontend...");
-      execSync("npm run build", {
-        cwd: path.join(process.cwd(), "web"),
-        stdio: "inherit",
-      });
-      console.log("✅ Build completed");
-    } catch (err) {
-      console.error("❌ Frontend build failed");
+    // 1. Check if public folder exists (production npm package)
+    const publicPath = path.join(__dirname, "..", "..", "public");
+    if (fs.existsSync(publicPath)) {
+      distPath = publicPath;
+      console.log("✅ Using pre-built web assets (production mode)");
+    }
+
+    // 2. Check if web/dist exists (development with built web)
+    const webDistPath = path.join(process.cwd(), "web", "dist");
+    if (!distPath && fs.existsSync(webDistPath)) {
+      distPath = webDistPath;
+      console.log("✅ Using web/dist (development mode)");
+    }
+
+    // 3. If neither exists and web folder is available, build it
+    if (!distPath) {
+      const webPath = path.join(process.cwd(), "web");
+      if (fs.existsSync(path.join(webPath, "package.json"))) {
+        console.log("📦 Installing web dependencies...");
+        try {
+          execSync("npm install", {
+            cwd: webPath,
+            stdio: "inherit",
+          });
+          console.log("✅ Dependencies installed");
+        } catch (err) {
+          console.error("⚠️  Warning: Could not install web dependencies");
+        }
+
+        try {
+          console.log("⚙️ Building frontend...");
+          execSync("npm run build", {
+            cwd: webPath,
+            stdio: "inherit",
+          });
+          console.log("✅ Build completed");
+          distPath = webDistPath;
+        } catch (err) {
+          console.error("❌ Frontend build failed");
+          process.exit(1);
+        }
+      } else {
+        console.error("❌ Web frontend not found");
+        console.error("   This likely means cloakx was not installed correctly.");
+        console.error("   Try reinstalling: npm install -g cloakx@latest");
+        process.exit(1);
+      }
+    }
+
+    if (!distPath) {
+      console.error("❌ Could not determine web frontend location");
       process.exit(1);
     }
 
@@ -116,7 +151,6 @@ export function webCommand() {
     app.use("/api", requireAuth, vaultRouter as any);
 
     // ✅ Serve frontend (after APIs)
-    const distPath = path.join(process.cwd(), "web", "dist");
     app.use(express.static(distPath));
 
     // 🔁 SPA fallback (important for React Router)
