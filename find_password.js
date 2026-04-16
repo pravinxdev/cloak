@@ -5,8 +5,8 @@ const passwords = ['test', 'password', '123456', 'admin', 'user', 'default', '',
 async function tryPassword(password) {
   return new Promise((resolve) => {
     const req = http.request({
-      hostname: 'localhost',
-      port: 3000,
+      hostname: '127.0.0.1',
+      port: 2000,
       path: '/api/login',
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }

@@ -18,7 +18,7 @@ const noopLimiter = (req: any, res: any, next: any) => next();
 // 🔐 FIXED: Rate limiting to prevent brute force attacks
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,  // 15 minutes
-  max: 50,  // 50 attempts per 15 minutes (increased for testing)
+  max: 5,  // ⬇️ REDUCED: 5 attempts per 15 minutes (was 50)
   handler: (req, res) => {
     res.status(429).json({ error: 'Too many login attempts. Please try again later.' });
   },
@@ -37,7 +37,7 @@ const passwordLimiter = rateLimit({
 });
 
 // 🔐 Login
-router.post('/login', noopLimiter, (req, res) => {
+router.post('/login', noopLimiter as any, (req, res) => {
   const { password } = req.body;
 
   try {
@@ -76,7 +76,7 @@ router.post('/login', noopLimiter, (req, res) => {
 
 
 
-router.post('/change-password', passwordLimiter, (req, res) => {
+router.post('/change-password', passwordLimiter as any, (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
   try {

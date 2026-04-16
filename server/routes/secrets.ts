@@ -32,6 +32,11 @@ function validateValue(value: any): string | null {
 
 // GET all
 router.get('/', (req, res) => {
+  // 🔐 Validate Content-Type
+  if (req.headers['content-type'] && !req.headers['content-type'].includes('application/json')) {
+    return res.status(415).json({ error: 'Content-Type must be application/json' });
+  }
+
   try {
     const key = getSessionKey();
     const vault = loadVault();
@@ -63,6 +68,11 @@ router.get('/', (req, res) => {
 
 // POST add/update
 router.post('/', (req, res) => {
+  // 🔐 Validate Content-Type
+  if (!req.headers['content-type']?.includes('application/json')) {
+    return res.status(415).json({ error: 'Content-Type must be application/json' });
+  }
+
   try {
     const { key, value, tags, environment, expires } = req.body;
     

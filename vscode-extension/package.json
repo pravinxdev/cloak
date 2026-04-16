@@ -1,0 +1,193 @@
+{
+  "name": "cloakx",
+  "displayName": "Cloakx - Secret Manager",
+  "description": "Manage encrypted secrets directly from VS Code. Access, create, and edit secrets without leaving your IDE.",
+  "version": "1.0.0",
+  "publisher": "pravinxdev",
+  "license": "MIT",
+  "icon": "resources/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pravinxdev/cloak.git"
+  },
+  "homepage": "https://github.com/pravinxdev/cloak#readme",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other",
+    "Security"
+  ],
+  "keywords": [
+    "secrets",
+    "encryption",
+    "vault",
+    "password",
+    "security",
+    "environment-variables",
+    "cloakx"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "cloakx.openSecrets",
+        "title": "Open Cloakx Secrets",
+        "icon": "$(lock)"
+      },
+      {
+        "command": "cloakx.insertSecret",
+        "title": "Insert Secret from Cloakx"
+      },
+      {
+        "command": "cloakx.createSecret",
+        "title": "Create New Secret in Cloakx"
+      },
+      {
+        "command": "cloakx.switchEnvironment",
+        "title": "Switch Cloakx Environment"
+      },
+      {
+        "command": "cloakx.refreshSecrets",
+        "title": "Refresh Cloakx Secrets",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "cloakx.logout",
+        "title": "Logout from Cloakx"
+      },
+      {
+        "command": "cloakx.login",
+        "title": "Login to Cloakx"
+      },
+      {
+        "command": "cloakx.revealSecret",
+        "title": "Show Secret Value",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "cloakx.copySecret",
+        "title": "Copy Secret to Clipboard",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "cloakx.deleteSecret",
+        "title": "Delete Secret",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "cloakx.editSecret",
+        "title": "Edit Secret Value"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "cloakx.openSecrets"
+        },
+        {
+          "command": "cloakx.insertSecret"
+        },
+        {
+          "command": "cloakx.createSecret"
+        },
+        {
+          "command": "cloakx.switchEnvironment"
+        },
+        {
+          "command": "cloakx.login"
+        },
+        {
+          "command": "cloakx.logout"
+        },
+        {
+          "command": "cloakx.refreshSecrets"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "cloakx.refreshSecrets",
+          "group": "navigation",
+          "when": "view == cloakx && cloakxAuthenticated"
+        },
+        {
+          "command": "cloakx.openSecrets",
+          "group": "navigation",
+          "when": "view == cloakx && cloakxAuthenticated"
+        }
+      ]
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "cloakx",
+          "name": "Cloakx Secrets",
+          "icon": "$(lock)",
+          "contextualTitle": "Cloakx Secret Manager"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "cloakx",
+        "contents": "Welcome to Cloakx!\n\nLogin to access your secrets.\n[Login](command:cloakx.login)\n\nNeed help? [Visit Documentation](https://github.com/pravinxdev/cloak)"
+      }
+    ],
+    "configuration": {
+      "title": "Cloakx",
+      "properties": {
+        "cloakx.environment": {
+          "type": "string",
+          "default": "default",
+          "description": "Active Cloakx environment"
+        },
+        "cloakx.showValues": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show secret values in the tree view (security risk)"
+        },
+        "cloakx.autoRefreshInterval": {
+          "type": "number",
+          "default": 0,
+          "description": "Auto-refresh secrets every N seconds (0 = disabled)"
+        },
+        "cloakx.copyTimeout": {
+          "type": "number",
+          "default": 10,
+          "description": "Clear clipboard after N seconds when copying secrets"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^20.19.39",
+    "@types/vscode": "^1.80.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.0",
+    "@typescript-eslint/parser": "^5.59.0",
+    "esbuild": "^0.18.0",
+    "eslint": "^8.40.0",
+    "glob": "^8.1.0",
+    "mocha": "^10.2.0",
+    "typescript": "^5.0.0",
+    "vscode-test": "^1.6.1"
+  },
+  "dependencies": {
+    "child_process": "^1.0.2"
+  }
+}

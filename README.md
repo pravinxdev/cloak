@@ -97,8 +97,77 @@ cloakx list
 ### 5. **Start Web UI**
 ```bash
 cloakx web
-# Opens http://localhost:3001
+# Opens http://127.0.0.1:1201
 ```
+
+---
+
+## 🎯 Multi-Parameter Commands (Pro Tips)
+
+### **Combine Parameters for Advanced Usage**
+
+Most Cloakx commands support **multiple parameters** that can be combined in **any order**:
+
+#### **Common Parameters**
+- `--env <environment>` - Specify which environment to use
+- `--expires <duration>` - Set expiration time (7d, 24h, 2026-12-31)
+- `--tags <tags>` - Add comma-separated tags (payment,critical,stripe)
+
+#### **Real-World Examples**
+
+**Production Environment with Expiration & Tags:**
+```bash
+# Set API key for production with 7-day expiration
+cloakx set API_KEY "sk_live_abc123" --env production --expires 7d --tags "payment,external"
+
+# Update database password with 30-day expiration
+cloakx upd DB_PASSWORD "newpass" --env production --expires 30d --tags "database,critical"
+```
+
+**Multi-Environment Management:**
+```bash
+# Development
+cloakx set DATABASE_URL "localhost:5432" --env development --tags "local"
+
+# Staging
+cloakx set DATABASE_URL "staging.db.com" --env staging --expires 30d --tags "database,staging"
+
+# Production
+cloakx set DATABASE_URL "prod.db.com" --env production --expires 90d --tags "database,critical"
+```
+
+**Filtering with Multiple Parameters:**
+```bash
+# List critical secrets in production environment
+cloakx list --env production --tag critical
+
+# Show all payment-related secrets
+cloakx list --tag payment
+
+# View expired secrets across all environments
+cloakx list --expired
+```
+
+**Parameter Order Doesn't Matter:**
+```bash
+# All of these work identically:
+cloakx set KEY "value" --env prod --expires 7d --tags "tag1"
+cloakx set KEY "value" --tags "tag1" --env prod --expires 7d
+cloakx set KEY "value" --expires 7d --tags "tag1" --env prod
+```
+
+### **Command Parameter Reference Table**
+
+| Command | `--env` | `--expires` | `--tags` | `--file` | `--masked` | `--expired` | `--tag` |
+|---------|---------|------------|----------|----------|-----------|-----------|---------|
+| **set** | ✅ | ✅ | ✅ | - | - | - | - |
+| **update** | ✅ | ✅ | ✅ | - | - | - | - |
+| **get** | ✅ | - | - | - | - | - | - |
+| **list** | ✅ | - | - | - | - | ✅ | ✅ |
+| **del** | ✅ | - | - | - | - | - | - |
+| **export** | ✅ | - | - | ✅ | ✅ | - | - |
+| **import** | ✅ | - | - | - | - | - | - |
+| **run** | ✅ | - | - | - | - | - | - |
 
 ---
 
@@ -151,7 +220,17 @@ cloakx set STRIPE_KEY "rk_test_123" --tags "payment,stripe,critical"
 # With expiration
 cloakx set TEMP_TOKEN "token_xyz" --expires "7d"
 cloakx set API_KEY "key_abc" --expires "2026-12-31"
+
+# 💡 COMBINE MULTIPLE PARAMETERS (any order)
+cloakx set API_KEY "sk_live_123" --env production --expires 7d
+cloakx set DB_URL "postgres://prod" --env production --expires 30d --tags "database,critical"
+cloakx set SECRET "value" --tags "payment" --expires 14d --env staging
 ```
+
+**Available Options:**
+- `--env <environment>` - Target environment (default: current environment)
+- `--expires <duration>` - Expiration time (supports: 7d, 24h, 2026-12-31)
+- `--tags <tags>` - Comma-separated tags (e.g., payment,stripe,critical)
 
 #### **get** - Retrieve a secret
 ```bash
@@ -164,7 +243,14 @@ cloakx get DATABASE_URL --env production
 # Examples
 cloakx get API_KEY
 cloakx get STRIPE_KEY --env production
+
+# 💡 RETRIEVE FROM ANY ENVIRONMENT
+cloakx get DB_URL --env staging
+cloakx get API_KEY --env production
 ```
+
+**Available Options:**
+- `--env <environment>` - Retrieve from specific environment (default: current)
 
 #### **list** - Show all secrets
 ```bash
@@ -181,7 +267,18 @@ cloakx list --tag payment
 
 # Show expired secrets
 cloakx list --expired
+
+# 💡 COMBINE FILTERS
+cloakx list --env production --tag critical
+cloakx list --env staging --tag payment
+cloakx list --tag critical --expired
 ```
+
+**Available Options:**
+- `--env <environment>` - Filter by environment
+- `--tag <tag>` - Filter by tag name
+- `--expired` - Show only expired secrets
+- `--all` - Show all environments
 
 #### **update | upd** - Modify a secret
 ```bash
@@ -194,7 +291,16 @@ cloakx update TEMP_TOKEN "new_token" --expires "30d"
 
 # Update in specific environment
 cloakx update DATABASE_URL "postgres://prod-db.com/db" --env production
+
+# 💡 COMBINE MULTIPLE PARAMETERS
+cloakx upd API_KEY "new_key" --env production --expires 7d
+cloakx update DB_PASSWORD "newpass" --env production --expires 30d --tags "database,critical"
 ```
+
+**Available Options:**
+- `--env <environment>` - Target environment
+- `--expires <duration>` - New expiration time
+- `--tags <tags>` - Update tags
 
 #### **del** - Delete a secret
 ```bash
@@ -204,7 +310,14 @@ cloakx del DATABASE_URL
 
 # Delete from specific environment
 cloakx del DATABASE_URL --env staging
+
+# 💡 DELETE FROM ANY ENVIRONMENT
+cloakx del SECRET --env production
+cloakx del TEMP_TOKEN --env staging
 ```
+
+**Available Options:**
+- `--env <environment>` - Delete from specific environment (default: current)
 
 ---
 
@@ -242,10 +355,17 @@ cloakx export --masked
 # Copy to clipboard
 cloakx export --copy
 
-# Examples
+# 💡 COMBINE PARAMETERS
 cloakx export --file .env.production --env production
-cloakx export --file .env.staging --env staging
+cloakx export --file .env.staging --env staging --masked
+cloakx export DATABASE_URL --env production
 ```
+
+**Available Options:**
+- `--env <environment>` - Export from specific environment
+- `--file <filename>` - Export to file (default: stdout)
+- `--masked` - Hide values (show key=*** only)
+- `--copy` - Copy to clipboard
 
 #### **import** - Import secrets from files
 ```bash
@@ -270,7 +390,15 @@ cloakx import secrets.env --use-existing
 cloakx import config.json      # JSON
 cloakx import secrets.env      # .env format
 cloakx import config.yaml      # YAML
+
+# 💡 COMBINE PARAMETERS
+cloakx import secrets.env --env production --use-existing
+cloakx import backup.env --env staging --use-existing
 ```
+
+**Available Options:**
+- `--env <environment>` - Import to specific environment
+- `--use-existing` - Don't prompt on duplicate keys
 
 ---
 
@@ -333,6 +461,15 @@ cloakx run --env staging npm start
 cloakx run python app.py
 cloakx run bash script.sh
 cloakx run docker run myimage
+
+# 💡 COMBINE WITH PARAMETERS
+cloakx run --env production docker build -t myapp .
+cloakx run --env staging npm start
+cloakx run --env production bash deploy.sh
+```
+
+**Available Options:**
+- `--env <environment>` - Use secrets from specific environment
 cloakx run npm start
 
 # Security: Secrets aren't visible in process list or shell history
@@ -341,11 +478,11 @@ cloakx run npm start
 #### **web** - Launch Web UI
 ```bash
 cloakx web
-# Starts:
-#   Frontend: http://localhost:3001
-#   Backend API: http://localhost:8080
+# Starts integrated web server:
+#   Frontend: http://localhost:1201
+#   Backend API: http://localhost:2000
 # 
-# Open browser to http://localhost:3001
+# Open browser to http://localhost:1201
 # Login with vault password
 ```
 
@@ -357,12 +494,129 @@ cloakx sync
 
 ---
 
+## ⏰ Expiration Formats & Tags Guide
+
+### **Expiration Format Options**
+
+All commands supporting `--expires` accept multiple formats:
+
+#### **Relative Duration** (from now)
+```bash
+# Days
+cloakx set KEY "value" --expires 7d     # 7 days from now
+cloakx set KEY "value" --expires 30d    # 30 days from now
+cloakx set KEY "value" --expires 1d     # 1 day from now
+
+# Hours
+cloakx set KEY "value" --expires 24h    # 24 hours from now
+cloakx set KEY "value" --expires 12h    # 12 hours from now
+
+# Minutes
+cloakx set KEY "value" --expires 60m    # 60 minutes from now
+cloakx set KEY "value" --expires 30m    # 30 minutes from now
+
+# Seconds
+cloakx set KEY "value" --expires 3600s  # 1 hour from now
+```
+
+#### **Absolute Date** (ISO 8601 format)
+```bash
+# Date only (midnight UTC)
+cloakx set KEY "value" --expires 2026-12-31
+
+# Date with time
+cloakx set KEY "value" --expires 2026-12-31T23:59:59Z
+cloakx set KEY "value" --expires 2027-01-15T14:30:00Z
+```
+
+#### **Real-World Expiration Examples**
+```bash
+# Temporary tokens (1 day)
+cloakx set DEPLOY_TOKEN "token123" --expires 1d
+
+# API keys (7 days)
+cloakx set WEBHOOK_KEY "key456" --expires 7d
+
+# Long-term secrets (90 days)
+cloakx set DB_PASSWORD "pass789" --expires 90d
+
+# Specific date-based expiration
+cloakx set SEASONAL_KEY "key999" --expires 2026-12-25
+```
+
+### **Tags Format & Usage**
+
+Tags are comma-separated strings for organizing and filtering secrets:
+
+#### **Basic Tag Usage**
+```bash
+# Single tag
+cloakx set API_KEY "value" --tags "payment"
+
+# Multiple tags (comma-separated, spaces auto-trimmed)
+cloakx set API_KEY "value" --tags "payment,stripe,external"
+cloakx set DB_URL "value" --tags "database, critical, production"
+
+# With other parameters
+cloakx set SECRET "value" --env production --expires 7d --tags "security,critical"
+```
+
+#### **Recommended Tag Conventions**
+```bash
+# Category tags
+--tags "payment"        # Feature area
+--tags "database"       # Type of secret
+--tags "security"       # Security classification
+
+# Environment tags
+--tags "production"     # Environment designation
+--tags "staging"
+--tags "development"
+
+# Priority/Classification tags
+--tags "critical"       # Importance level
+--tags "external"       # External service
+--tags "temporary"      # Temporary access
+```
+
+#### **Filtering by Tags**
+```bash
+# View all payment-related secrets
+cloakx list --tag payment
+
+# View all critical secrets
+cloakx list --tag critical
+
+# View all production secrets
+cloakx list --tag production
+
+# Combined filtering
+cloakx list --env production --tag critical
+```
+
+#### **Real-World Tag Examples**
+```bash
+# Payment processor
+cloakx set STRIPE_KEY "sk_live_123" --tags "payment,stripe,critical" --expires 90d
+
+# Database credentials
+cloakx set DB_PASSWORD "pass" --tags "database,production,critical" --env production --expires 180d
+
+# External API
+cloakx set GITHUB_TOKEN "token" --tags "github,external,ci-cd" --expires 30d
+
+# Temporary deployment
+cloakx set DEPLOY_TOKEN "token" --tags "temporary,deploy" --expires 1d
+```
+
+---
+
 ## 🌐 Web UI Documentation
 
 ### **Accessing the Web Interface**
 ```bash
 cloakx web
-# Navigate to http://localhost:3001
+# Navigate to http://localhost:1201
 ```
 
 ### **UI Features**

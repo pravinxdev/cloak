@@ -7,13 +7,15 @@ import authRouter from './routes/auth';
 import vaultRouter from './routes/vault';
 const app = express();
 
-// 🔐 CORS - restrict to localhost:3001
+// 🔐 CORS - restrict to 127.0.0.1:1201 (web UI port)
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3001',
+  origin: process.env.CORS_ORIGIN || 'http://127.0.0.1:1201',
   credentials: true,
 }));
 
-app.use(express.json());
+// 🔐 Add request body size limit to prevent DoS
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ limit: '1mb' }));
 
 // 🔐 Authentication middleware for protected routes
 function requireAuth(req: Request, res: Response, next: NextFunction) {
@@ -33,6 +35,12 @@ app.use('/api', authRouter);
 app.use('/api/secrets', requireAuth, secretsRouter);
 app.use('/api', requireAuth, vaultRouter);
 
-app.listen(8080, () => {
-  console.log('🚀 API running on http://localhost:8080');
+app.listen(2000, () => {
+  console.log('🚀 API running on http://127.0.0.1:2000');
+  
+  // 🔒 SECURITY WARNING: Show HTTPS notice for non-development environments
+  if (process.env.NODE_ENV && process.env.NODE_ENV !== 'development') {
+    console.warn('⚠️  WARNING: Server is running on HTTP without SSL/TLS.');
+    console.warn('   In production, always use HTTPS to protect passwords and session keys.');
+  }
 });

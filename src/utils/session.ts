@@ -76,8 +76,17 @@ export function createSession(key: Buffer, username = 'user') {
   const sessionDir = path.dirname(sessionPath);
 
   if (!fs.existsSync(sessionDir)) {
-    fs.mkdirSync(sessionDir, { recursive: true });
+    fs.mkdirSync(sessionDir, { recursive: true, mode: 0o700 });
   }
+
+  // 🔐 FIXED: Write session file with restricted permissions (owner read/write only)
+  const sessionData = {
+    token: key.toString('base64'),
+    username,
+    createdAt: new Date().toISOString(),
+    createdAtTimestamp: Date.now()
+  };
+  fs.writeFileSync(sessionPath, JSON.stringify(sessionData, null, 2), { mode: 0o600 });
 
   const session = {
     token: crypto.randomBytes(24).toString('hex'),
