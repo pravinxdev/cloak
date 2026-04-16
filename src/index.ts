@@ -25,7 +25,7 @@ const program = new Command();
 program
   .name('cloakx')
   .description('Secure CLI for managing encrypted secrets')
-  .version('1.0.6');
+  .version('1.0.7');
 
 program
   .addCommand(encryptCommand())
