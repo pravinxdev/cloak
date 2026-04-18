@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import { getSessionKey } from '../src/utils/session';
+import { APP_INFO } from '../src/config/version';
 
 import secretsRouter from './routes/secrets';
 import authRouter from './routes/auth';
@@ -26,6 +27,12 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
     res.status(401).json({ error: err.message || 'Unauthorized' });
   }
 }
+
+// ✅ PUBLIC ROUTES (no auth required)
+// Info endpoint - returns app version and metadata
+app.get('/api/info', (req: Request, res: Response) => {
+  res.json(APP_INFO);
+});
 
 // ✅ routes
 // Auth routes (no auth required)

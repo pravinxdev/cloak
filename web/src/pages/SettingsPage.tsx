@@ -35,6 +35,10 @@ export default function SettingsPage() {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [selectedClearEnv, setSelectedClearEnv] = useState<string>("__all__"); // 🗑️ For clear vault dialog
 
+  // App info states
+  const [appInfo, setAppInfo] = useState<any>(null);
+  const [appInfoLoading, setAppInfoLoading] = useState(true);
+
   // Password states
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -131,8 +135,23 @@ export default function SettingsPage() {
     }
   };
 
+  // ✅ fetch app info (version, encryption type, etc)
+  const fetchAppInfo = async () => {
+    try {
+      setAppInfoLoading(true);
+      const info = await api.getInfo();
+      setAppInfo(info);
+    } catch (err: any) {
+      console.error('Failed to fetch app info:', err);
+      setAppInfo(null);
+    } finally {
+      setAppInfoLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchSecrets();
+    fetchAppInfo();
   }, []);
 
   // ✅ clear vault
@@ -459,19 +478,19 @@ export default function SettingsPage() {
                 <div className="space-y-4">
                   <div className="p-4 bg-secondary rounded-lg">
                     <p className="text-sm text-muted-foreground">Version</p>
-                    <p className="font-semibold">1.0.2</p>
+                    <p className="font-semibold">{appInfoLoading ? '...' : appInfo?.version || '1.0.0'}</p>
                   </div>
                   <div className="p-4 bg-secondary rounded-lg">
                     <p className="text-sm text-muted-foreground">Created by</p>
-                    <p className="font-semibold">Pravin</p>
+                    <p className="font-semibold">{appInfo?.author || 'Pravin'}</p>
                   </div>
                   <div className="p-4 bg-secondary rounded-lg">
                     <p className="text-sm text-muted-foreground">Encryption</p>
-                    <p className="font-semibold">AES-256-CBC</p>
+                    <p className="font-semibold">{appInfo?.encryption || 'AES-256-CBC'}</p>
                   </div>
                   <div className="p-4 bg-secondary rounded-lg">
                     <p className="text-sm text-muted-foreground">Key Derivation</p>
-                    <p className="font-semibold">Scrypt</p>
+                    <p className="font-semibold">{appInfo?.keyDerivation || 'Scrypt'}</p>
                   </div>
                 </div>
               </CardContent>

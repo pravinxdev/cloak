@@ -92,6 +92,10 @@ export interface SecretData {
 }
 
 export const api = {
+  getInfo: () =>
+    fetch(`${BASE_URL}/info`) // ✅ Public endpoint, no auth/credentials needed
+      .then(res => res.json()),
+
   login: (password: string) =>
     request('/login', {
       method: 'POST',

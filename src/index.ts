@@ -17,6 +17,7 @@ import { runCommand } from './commands/run';
 import { envCommand } from './commands/env';
 import { syncCommand } from './commands/sync';
 import { changePasswordCommand } from './commands/change-password';
+import { APP_VERSION } from './config/version';
 
 
 
@@ -25,7 +26,7 @@ const program = new Command();
 program
   .name('cloakx')
   .description('Secure CLI for managing encrypted secrets')
-  .version('1.0.8');
+  .version(APP_VERSION);
 
 program
   .addCommand(encryptCommand())
