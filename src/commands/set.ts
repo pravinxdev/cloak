@@ -3,7 +3,7 @@ import { encrypt } from '../utils/crypto';
 import { getVaultPath } from '../config/paths';
 import { getSessionKey } from '../utils/session';
 import { loadVault, saveVault, updateSecret, loadVaultForEnvironment, saveVaultForEnvironment } from '../utils/vault';
-import { getActiveEnvironment } from '../utils/environments';
+import { getActiveEnvironment, listEnvironments, createEnvironment } from '../utils/environments';
 import { parseExpiration } from '../utils/expiration';
 import fs from 'fs';
 
@@ -20,6 +20,15 @@ export function setCommand() {
         
         // 📝 Determine environment
         const environment = options.env || getActiveEnvironment();
+        
+        // ✅ Auto-create environment if it doesn't exist
+        if (options.env) {
+          const envs = listEnvironments();
+          if (!envs.includes(environment)) {
+            createEnvironment(environment);
+            console.log(`✨ Created new environment: ${environment}`);
+          }
+        }
         
         // 🔓 Load from the specified environment's vault
         const vault = options.env 

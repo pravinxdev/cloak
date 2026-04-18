@@ -42,8 +42,9 @@ export function getActiveEnvironment(): string {
 export function setActiveEnvironment(env: string): void {
   const config = loadConfig();
   
+  // Validate environment exists
   if (!config.environments.includes(env)) {
-    config.environments.push(env);
+    throw new Error(`Environment "${env}" does not exist. Available environments: ${config.environments.join(', ')}`);
   }
   
   config.env = env;
@@ -69,6 +70,11 @@ export function createEnvironment(env: string): void {
 // ➖ Delete environment
 export function deleteEnvironment(env: string): void {
   const config = loadConfig();
+  
+  // Validate environment exists
+  if (!config.environments.includes(env)) {
+    throw new Error(`Environment "${env}" does not exist. Available environments: ${config.environments.join(', ')}`);
+  }
   
   config.environments = config.environments.filter((e) => e !== env);
   

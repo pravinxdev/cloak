@@ -3,6 +3,7 @@ import fs from 'fs';
 import clipboard from 'clipboardy';
 import { decrypt } from '../utils/crypto';
 import { getSessionKey } from '../utils/session';
+import { getActiveEnvironment } from '../utils/environments';
 import { loadVault, getSecretValue } from '../utils/vault';
 
 function maskValue(value: string): string {
@@ -17,6 +18,7 @@ export function exportCommand() {
     .description('Export secrets as .env format')
     .argument('[key]', 'Export specific key (optional)')
     .option('-f, --file <path>', 'Write to file (e.g., .env)')
+    .option('-e, --env <name>', 'Environment name')
     .option('-m, --masked', 'Mask values')
     .option('-c, --copy', 'Copy output to clipboard')
     .action((keyArg, options) => {
@@ -35,17 +37,33 @@ export function exportCommand() {
         return;
       }
 
-      const keys = keyArg ? [keyArg] : Object.keys(vault);
+      const env = options.env || getActiveEnvironment();
+      let keys = keyArg ? [keyArg] : Object.keys(vault);
+      
+      // Filter keys by environment if specified
+      keys = keys.filter(k => {
+        if (k.startsWith('__')) return false; // skip internal keys
+        if (options.env) {
+          // Include environment-scoped keys or keys without environment
+          return k.endsWith(`__${env}`) || (!k.includes('__') && k === keyArg);
+        }
+        return true;
+      });
+
       const lines: string[] = [];
 
       for (const k of keys) {
         const encrypted = getSecretValue(vault, k);
         if (!encrypted) {
+          if (!keyArg) continue; // Skip missing keys in bulk export
           console.log(`❌ No such key: ${k}`);
           continue;
         }
 
         if (k.startsWith('__')) continue; // skip internal keys
+
+        // Extract key name without environment suffix
+        const keyName = k.includes('__') ? k.split('__')[0] : k;
 
         try {
           let value = decrypt(encrypted, key);
@@ -54,9 +72,9 @@ export function exportCommand() {
             value = maskValue(value);
           }
 
-          lines.push(`${k}=${value}`);
+          lines.push(`${keyName}=${value}`);
         } catch {
-          console.log(`⚠️ Failed to decrypt key: ${k}`);
+          console.log(`⚠️ Failed to decrypt key: ${keyName}`);
         }
       }
 
