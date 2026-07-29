@@ -1,4 +1,8 @@
-# 🕶️ Cloakx - Secure Secret Manager
+# 🕶️ CloakX - Secure Secret Manager
+
+[![Documentation](https://img.shields.io/badge/Documentation-Live-2563EB?style=for-the-badge)](https://pravinxdev.github.io/cloak/)
+[![npm](https://img.shields.io/npm/v/cloakx?style=for-the-badge)](https://www.npmjs.com/package/cloakx)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
 **Cloakx** is a powerful, developer-friendly secret management tool that combines a secure CLI and beautiful web UI. Manage encrypted secrets locally with ease — perfect for developers, DevOps, and teams.
 
