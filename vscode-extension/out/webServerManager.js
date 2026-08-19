@@ -41,8 +41,8 @@ class WebServerManager {
     constructor(extensionPath) {
         this.webProcess = null;
         this.backendProcess = null;
-        this.webPort = 3000;
-        this.backendPort = 8080;
+        this.webPort = 1201;
+        this.backendPort = 2000;
         this.isRunning = false;
         this.extensionPath = extensionPath;
         this.outputChannel = vscode.window.createOutputChannel('Cloakx Web Server');
