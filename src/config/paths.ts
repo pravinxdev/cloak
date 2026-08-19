@@ -9,8 +9,11 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 
-const baseDir = path.join(os.homedir(), '.cloakx');
-const configPath = path.join(baseDir, 'config.json');
+// 🔧 Honor CLOAKX_VAULT_PATH override, otherwise default to ~/.cloakx
+export const baseDir = process.env.CLOAKX_VAULT_PATH
+  ? path.resolve(process.env.CLOAKX_VAULT_PATH)
+  : path.join(os.homedir(), '.cloakx');
+export const configPath = path.join(baseDir, 'config.json');
 
 function getCurrentEnv(): string {
   if (!fs.existsSync(configPath)) return 'default';

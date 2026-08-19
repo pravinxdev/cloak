@@ -26,7 +26,7 @@ function isPortAvailable(port: number): Promise<boolean> {
       server.close();
       resolve(true);
     });
-    server.listen(port);
+    server.listen(port, "127.0.0.1");
   });
 }
 
@@ -170,7 +170,7 @@ export function webCommand() {
       res.status(500).json({ error: "Internal server error" });
     });
 
-    const server = app.listen(PORT, () => {
+    const server = app.listen(PORT, "127.0.0.1", () => {
       console.log(`\n🌐 Cloakx Web UI is running!`);
       console.log(`   📱 Frontend URL: http://127.0.0.1:${PORT}`);
       console.log(`   🔗 Backend API: http://127.0.0.1:2000`);

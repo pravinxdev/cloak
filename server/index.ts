@@ -42,7 +42,7 @@ app.use('/api', authRouter);
 app.use('/api/secrets', requireAuth, secretsRouter);
 app.use('/api', requireAuth, vaultRouter);
 
-app.listen(2000, () => {
+app.listen(2000, '127.0.0.1', () => {
   console.log('🚀 API running on http://127.0.0.1:2000');
   
   // 🔒 SECURITY WARNING: Show HTTPS notice for non-development environments

@@ -14,8 +14,8 @@ function validateKey(key: any): string | null {
   if (key.length > 256) {
     return 'Key is too long (max 256 characters)';
   }
-  if (!/^[a-zA-Z0-9_-]+$/.test(key)) {
-    return 'Key can only contain letters, numbers, hyphens, and underscores';
+  if (!/^[a-zA-Z0-9._-]+$/.test(key)) {
+    return 'Key can only contain letters, numbers, dots, hyphens, and underscores';
   }
   return null;
 }

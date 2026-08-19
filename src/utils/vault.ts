@@ -1,5 +1,6 @@
 import fs from 'fs';
-import { getVaultPath } from '../config/paths';
+import path from 'path';
+import { getVaultPath, baseDir } from '../config/paths';
 
 // 📊 New vault schema with metadata support
 export interface SecretMetadata {
@@ -84,9 +85,6 @@ export function saveVault(vault: Vault): void {
 
 // 🌍 Load vault for a specific environment
 export function loadVaultForEnvironment(environment: string): Vault {
-  const os = require('os');
-  const path = require('path');
-  const baseDir = path.join(os.homedir(), '.cloakx');
   const vaultPath = path.join(baseDir, `${environment}.vault.json`);
   
   if (!fs.existsSync(vaultPath)) return {};
@@ -116,9 +114,6 @@ export function loadVaultForEnvironment(environment: string): Vault {
 // 🌍 Save vault for a specific environment
 export function saveVaultForEnvironment(vault: Vault, environment: string): void {
   try {
-    const os = require('os');
-    const path = require('path');
-    const baseDir = path.join(os.homedir(), '.cloakx');
     const vaultPath = path.join(baseDir, `${environment}.vault.json`);
     
     fs.writeFileSync(vaultPath, JSON.stringify(vault, null, 2), 'utf-8');
@@ -144,17 +139,24 @@ export function updateSecret(
   metadata?: {
     tags?: string[];
     environment?: string;
-    expiresAt?: number;
+    expiresAt?: number | null; // null explicitly clears the expiry; undefined preserves the existing value
   }
 ): Vault {
   const now = Date.now();
   const existing = vault[key];
-  
+
+  // expiresAt semantics: explicit null clears the expiry, a number sets it,
+  // and undefined preserves whatever the secret already had.
+  const expiresAt = metadata?.expiresAt === undefined
+    ? (typeof existing === 'object' ? existing.expiresAt : undefined)
+    : metadata.expiresAt;
+
   vault[key] = {
     value,
     tags: metadata?.tags || (typeof existing === 'object' ? existing.tags : []),
     environment: metadata?.environment || (typeof existing === 'object' ? existing.environment : 'default'),
-    expiresAt: metadata?.expiresAt || (typeof existing === 'object' ? existing.expiresAt : undefined),
+    // Drop the key entirely when cleared so the vault file stays clean
+    ...(expiresAt === null || expiresAt === undefined ? {} : { expiresAt }),
     createdAt: typeof existing === 'object' ? existing.createdAt : now,
     updatedAt: now
   };
@@ -245,50 +247,60 @@ export function getMetadata(vault: Vault, key: string) {
 }
 
 // 🌍 Load all secrets from all environments (for web UI)
-// Returns a flat list with environment context, handling duplicates across environments
+// Returns a flat list with environment context, handling duplicates across environments.
+// Naming: the first-seen key (default env preferred) keeps the plain name; on a
+// cross-environment collision every copy is stored as `key@<environment>`.
 export function getAllSecretsFromAllEnvironments(): Record<string, SecretMetadata> {
-  const os = require('os');
-  const path = require('path');
-  const baseDir = path.join(os.homedir(), '.cloakx');
-  
   const allSecrets: Record<string, SecretMetadata> = {};
-  
+  // Track which environments have already been recorded for each plain key, so
+  // collisions are resolved deterministically and no secret is ever dropped.
+  const seenFor: Record<string, Set<string>> = {};
+
   try {
-    // Read all .vault.json files from the .cloakx directory
+    // Read all .vault.json files from the vault directory
     const files = fs.readdirSync(baseDir).filter(f => f.endsWith('.vault.json'));
-    
+
     // Sort files to ensure consistent ordering (default first, then alphabetically)
     files.sort((a, b) => {
       if (a === 'default.vault.json') return -1;
       if (b === 'default.vault.json') return 1;
       return a.localeCompare(b);
     });
-    
+
     for (const file of files) {
       const vaultPath = path.join(baseDir, file);
       try {
         const raw = fs.readFileSync(vaultPath, 'utf-8');
         const vault = JSON.parse(raw);
-        
+
         // Merge all secrets from this environment's vault
         for (const [key, secret] of Object.entries(vault)) {
-          if (typeof secret === 'object' && secret !== null) {
-            const metadata = secret as SecretMetadata;
-            // Use key@environment as unique ID if duplicate keys exist across environments
-            const compositeKey = allSecrets[key] ? `${key}@${metadata.environment || 'default'}` : key;
-            
-            // If this key is already used and it's from a different environment, add the environment suffix
-            if (allSecrets[key] && (allSecrets[key].environment || 'default') !== (metadata.environment || 'default')) {
-              // Rename the existing one if needed
+          if (typeof secret !== 'object' || secret === null) continue;
+          const metadata = secret as SecretMetadata;
+          const env = metadata.environment || 'default';
+
+          if (!seenFor[key]) {
+            // First encounter of this plain key anywhere → keep the plain name
+            allSecrets[key] = metadata;
+            seenFor[key] = new Set([env]);
+          } else if (seenFor[key].has(env)) {
+            // Same key from the same environment already recorded — keep the first
+            continue;
+          } else {
+            // Cross-environment collision.
+            if (allSecrets[key]) {
+              // The plain name is still occupied → promote it to its suffixed form
               const existingEnv = allSecrets[key].environment || 'default';
-              const existingKey = `${key}@${existingEnv}`;
-              if (!allSecrets[existingKey]) {
-                allSecrets[existingKey] = allSecrets[key];
+              if (!allSecrets[`${key}@${existingEnv}`]) {
+                allSecrets[`${key}@${existingEnv}`] = allSecrets[key];
               }
               delete allSecrets[key];
             }
-            
-            allSecrets[compositeKey] = metadata;
+            // Store the newcomer under its environment suffix
+            if (!allSecrets[`${key}@${env}`]) {
+              allSecrets[`${key}@${env}`] = metadata;
+            }
+            seenFor[key].add(env);
           }
         }
       } catch (err) {
@@ -299,6 +311,6 @@ export function getAllSecretsFromAllEnvironments(): Record<string, SecretMetadat
   } catch (err) {
     // Return empty if directory doesn't exist
   }
-  
+
   return allSecrets;
 }
