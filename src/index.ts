@@ -18,6 +18,8 @@ import { envCommand } from './commands/env';
 import { syncCommand } from './commands/sync';
 import { changePasswordCommand } from './commands/change-password';
 import { hookCommand } from './commands/hook';
+import { auditCommand } from './commands/audit';
+
 
 import { APP_VERSION } from './config/version';
 
@@ -49,6 +51,7 @@ program
   .addCommand(syncCommand())
   .addCommand(changePasswordCommand())
   .addCommand(hookCommand())
+  .addCommand(auditCommand())
 
 
 program.parse(process.argv);
