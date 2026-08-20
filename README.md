@@ -475,6 +475,14 @@ cloakx run --env production bash deploy.sh
 **Available Options:**
 - `--env <environment>` - Use secrets from specific environment
 cloakx run npm start
+#### **sync** - Synchronize secrets into a .env file
+```bash
+cloakx sync
+# Syncs vault data (useful if configured with backend)
+cloakx sync                     # Sync active env secrets to local .env
+cloakx sync --env production    # Sync production secrets to .env
+cloakx sync -f custom.env       # Sync secrets to a custom filename
+cloakx sync --watch             # Real-time auto-sync on changes
 
 # Security: Secrets aren't visible in process list or shell history
 ```

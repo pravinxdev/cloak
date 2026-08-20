@@ -12,6 +12,7 @@ import {
   Settings,
   BookOpen,
   GitBranch,
+  RefreshCw,
 } from 'lucide-react';
 
 export interface DocEntry {
@@ -130,6 +131,18 @@ export const docs: DocEntry[] = [
       'Import an existing .env file with cloakx import .env — each KEY=VALUE line becomes a secret in the active vault.',
       'Export the whole vault to an encrypted bundle with cloakx export --out backup.cloak, or export a single environment to .env with cloakx env staging --export.',
       'Encrypted bundles can be restored on any machine with cloakx import backup.cloak.',
+    ],
+  },
+  {
+    slug: 'sync',
+    title: 'Local .env Sync',
+    description: 'Synchronize vault secrets directly into a local .env file.',
+    icon: RefreshCw,
+    category: 'Guides',
+    body: [
+      'The cloakx sync command exports active vault or environment secrets directly into your workspace .env file.',
+      'Use cloakx sync --env production to pull specific environment secrets, or -f custom.env to target a custom path.',
+      'With --watch enabled (cloakx sync --watch), CloakX automatically updates the target file in real-time whenever secrets are added or modified.',
     ],
   },
   {

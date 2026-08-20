@@ -61,6 +61,12 @@ export const cliCommands: CliCommand[] = [
     example: '$ cloakx list\nOPENAI_KEY\nDATABASE_URL\nJWT_SECRET',
   },
   {
+    command: 'cloakx sync',
+    description: 'Synchronize active environment secrets into a local .env file (supports --watch).',
+    icon: RefreshCw,
+    example: '$ cloakx sync --env production --watch\n✔ Syncing production secrets to .env\n✔ Watching for changes...',
+  },
+  {
     command: 'cloakx update',
     description: 'Rotate an existing secret value in place, preserving its key.',
     icon: RefreshCw,
