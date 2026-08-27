@@ -6,7 +6,7 @@
 
 **Cloakx** is a powerful, developer-friendly secret management tool that combines a secure CLI and beautiful web UI. Manage encrypted secrets locally with ease — perfect for developers, DevOps, and teams.
 
-> 🔐 **Secure. Simple. Scalable.** Store API keys, tokens, database credentials, and sensitive data with military-grade encryption (AES-256-GCM) and password protection.
+> 🔐 **Secure. Simple. Scalable.** Store API keys, tokens, database credentials, and sensitive data with AES-256-CBC encryption and password protection.
 
 ---
 
