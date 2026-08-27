@@ -6,6 +6,7 @@ import cors from "cors";
 import authRouter from "../../server/routes/auth";
 import secretsRouter from "../../server/routes/secrets";
 import vaultRouter from "../../server/routes/vault";
+import shareRouter from "../../server/routes/share";
 import { getSessionKey } from "../utils/session";
 import open from "open";
 import { createServer } from "http";
@@ -153,6 +154,7 @@ export function webCommand() {
     app.use("/api", authRouter as any);
 
     // Protected routes (require auth)
+    app.use("/api/share", requireAuth, shareRouter as any);
     app.use("/api/secrets", requireAuth, secretsRouter as any);
     app.use("/api", requireAuth, vaultRouter as any);
 

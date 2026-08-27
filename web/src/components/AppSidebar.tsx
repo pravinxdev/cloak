@@ -1,5 +1,5 @@
-import {
-  KeyRound, Plus, Download, Upload, Layers, Terminal, Settings, LogOut
+﻿import {
+  KeyRound, Plus, Download, Upload, Layers, Terminal, Settings, LogOut, Share2
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -12,6 +12,7 @@ import {
 const navItems = [
   { title: "Secrets", url: "/", icon: KeyRound },
   { title: "Add Secret", url: "/add", icon: Plus },
+  { title: "Share", url: "/share", icon: Share2 },
   { title: "Export", url: "/export", icon: Download },
   { title: "Import", url: "/import", icon: Upload },
   { title: "Environments", url: "/environments", icon: Layers },
@@ -22,7 +23,6 @@ const navItems = [
 export function AppSidebar() {
   const location = useLocation();
   const { logout, activeEnvironment } = useApp();
-  
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border">

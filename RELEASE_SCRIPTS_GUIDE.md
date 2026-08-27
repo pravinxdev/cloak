@@ -1,6 +1,6 @@
 # 🚀 AUTOMATED RELEASE SCRIPTS
 
-**Three ways to release Cloakx - Pick your favorite!**
+**Release Cloakx to npm and GitHub from Windows.**
 
 ---
 
@@ -23,9 +23,9 @@
 ### Option 2: Batch File (Interactive)
 
 ```batch
-release-final.bat
+release.bat
 # Or with version:
-release-final.bat 1.0.9
+release.bat
 ```
 
 **Pros:**
@@ -33,22 +33,11 @@ release-final.bat 1.0.9
 - ✅ Simple and clear
 - ✅ Good feedback
 
-### Option 3: Simple Batch (Quick)
-
-```batch
-simple-release.bat 1.0.9
-```
-
-**Pros:**
-- ✅ Fastest
-- ✅ Minimal output
-- ✅ Copy-paste commands
-
 ---
 
-## 🔄 WHAT EACH SCRIPT DOES
+## 🔄 WHAT THE SCRIPTS DO
 
-All three scripts follow the SAME process:
+Both scripts follow this process:
 
 ```
 1️⃣ Prompt for version (or use parameter)
@@ -59,10 +48,12 @@ All three scripts follow the SAME process:
    ↓
 4️⃣ Run: npm run build
    ↓
-5️⃣ IF build succeeds → Run: npm publish
+5️⃣ If the build succeeds, run: npm publish
    ↓
-6️⃣ IF build fails → STOP (don't publish)
+6️⃣ Commit, tag, and push the release to GitHub manually
 ```
+
+If the build fails, publishing stops. Fix the build before running `npm publish`.
 
 ---
 
@@ -74,15 +65,15 @@ All three scripts follow the SAME process:
 ```powershell
 .\release.ps1
 # Output:
-# Current version: export const APP_VERSION = '1.0.8'
-# Enter new version (e.g., 1.0.9): 1.0.9
+# Current version: export const APP_VERSION = '1.0.9'
+# Enter new version (e.g., 1.1.0): 1.1.0
 # Ready to release? (Y/n): Y
 # ... building and publishing ...
 ```
 
 **Direct mode (version as parameter):**
 ```powershell
-.\release.ps1 -Version "1.0.9"
+.\release.ps1 -Version "1.1.0"
 # Skips the prompt and releases directly
 ```
 
@@ -97,14 +88,14 @@ All three scripts follow the SAME process:
 
 **Interactive mode:**
 ```batch
-release-final.bat
+release.bat
 # Prompts for version and confirmation
 ```
 
-**Direct mode:**
+**Interactive mode:**
 ```batch
-release-final.bat 1.0.9
-# Skips the prompt
+release.bat
+# Prompts for the version and confirmation
 ```
 
 **Features:**
@@ -113,20 +104,6 @@ release-final.bat 1.0.9
 - Clear error messages
 
 ---
-
-### SIMPLE BATCH (Quick)
-
-**Must provide version:**
-```batch
-simple-release.bat 1.0.9
-```
-
-**What it does:**
-- Updates version
-- Syncs to package.json
-- Builds
-- Publishes (if build succeeds)
-- Exits with status code
 
 ---
 
@@ -239,9 +216,8 @@ Try again with: npm publish
 |-----------|--------|---------|
 | Daily releases | PowerShell | `.\release.ps1` |
 | First time | PowerShell | `.\release.ps1` |
-| PowerShell disabled | Batch | `release-final.bat` |
-| Quick release | Simple Batch | `simple-release.bat 1.0.9` |
-| CI/CD pipeline | Any (add to pipeline) | See CI/CD section |
+| PowerShell disabled | Batch | `release.bat` |
+| CI/CD pipeline | Run the npm commands directly | See the steps above |
 
 ---
 
@@ -271,24 +247,18 @@ All scripts include:
 
 ## 📝 EXAMPLES
 
-### Release 1.0.9 using PowerShell
+### Release 1.1.0 using PowerShell
 
 ```powershell
-PS> .\release.ps1 -Version "1.0.9"
+PS> .\release.ps1 -Version "1.1.0"
 ```
 
 ### Release 1.1.0 using Batch (interactive)
 
 ```batch
-C:\cloakx> release-final.bat
+C:\cloakx> release.bat
 C:\cloakx> (prompts for version)
 C:\cloakx> (prompts for confirmation)
-```
-
-### Release 2.0.0 quickly
-
-```batch
-C:\cloakx> simple-release.bat 2.0.0
 ```
 
 ---
@@ -307,7 +277,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```batch
 # Make sure you're in the project root
 cd d:\projects\npm\cloak
-release-final.bat 1.0.9
+release.bat
 ```
 
 ### Build Fails
@@ -332,16 +302,16 @@ attrib src\config\version.ts
 
 ## 📊 COMPARISON TABLE
 
-| Feature | PS1 | Batch | Simple |
-|---------|-----|-------|--------|
-| **Version prompt** | ✅ | ✅ | ❌ |
-| **Confirmation prompt** | ✅ | ✅ | ❌ |
-| **Colored output** | ✅ | ⚠️ | ❌ |
-| **Error handling** | ✅✅✅ | ✅✅ | ✅ |
-| **Windows native** | ✅ | ✅✅ | ✅✅ |
-| **PowerShell required** | ✅ | ❌ | ❌ |
-| **Speed** | Medium | Medium | Fast |
-| **Readability** | Excellent | Good | OK |
+| Feature | PS1 | Batch |
+|---------|-----|-------|
+| **Version prompt** | ✅ | ✅ |
+| **Confirmation prompt** | ✅ | ✅ |
+| **Colored output** | ✅ | ⚠️ |
+| **Error handling** | ✅✅✅ | ✅✅ |
+| **Windows native** | ✅ | ✅✅ |
+| **PowerShell required** | ✅ | ❌ |
+| **Speed** | Medium | Medium |
+| **Readability** | Excellent | Good |
 
 ---
 
@@ -354,13 +324,17 @@ Pick your preferred method and run it:
 .\release.ps1
 
 # Or Batch
-release-final.bat
-
-# Or Simple
-simple-release.bat 1.0.9
+release.bat
 ```
 
-That's it! Full automation with safety checks! 🎉
+After npm publish succeeds, push the release to GitHub:
+
+```powershell
+git add .
+git commit -m "chore: release v1.1.0"
+git tag v1.1.0
+git push origin main --follow-tags
+```
 
 ---
 
@@ -369,9 +343,8 @@ That's it! Full automation with safety checks! 🎉
 | Task | Command |
 |------|---------|
 | Release (interactive) | `.\release.ps1` |
-| Release 1.0.9 directly | `.\release.ps1 -Version "1.0.9"` |
-| Release (batch mode) | `release-final.bat` |
-| Fast release | `simple-release.bat 1.0.9` |
-| Manual process | `npm run update-version && npm run build && npm publish` |
+| Release 1.1.0 directly | `.\release.ps1 -Version "1.1.0"` |
+| Release (batch mode) | `release.bat` |
+| Manual process | `npm run update-version; npm run build; npm publish` |
 
-All scripts do the same thing - pick what works best for you! 🎯
+The scripts publish to npm. GitHub commits and tags are pushed separately with the commands above.

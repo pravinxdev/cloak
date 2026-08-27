@@ -27,7 +27,7 @@ export function WebPage() {
             </p>
             <div className="mt-4">
               <CodeBlock
-                code={'$ cloakx web\n✔ Dashboard running at http://localhost:7431'}
+                code={'$ cloakx web\n✔ Dashboard running at http://127.0.0.1:1201'}
                 filename="terminal"
               />
             </div>

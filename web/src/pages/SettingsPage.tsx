@@ -197,10 +197,10 @@ export default function SettingsPage() {
               <Shield className="w-4 h-4" />
               <span className="hidden sm:inline">Account</span>
             </TabsTrigger>
-            <TabsTrigger value="preferences" className="flex items-center gap-2">
+            {/* <TabsTrigger value="preferences" className="flex items-center gap-2">
               <Moon className="w-4 h-4" />
               <span className="hidden sm:inline">Preferences</span>
-            </TabsTrigger>
+            </TabsTrigger> */}
             <TabsTrigger value="security" className="flex items-center gap-2">
               <Lock className="w-4 h-4" />
               <span className="hidden sm:inline">Security</span>

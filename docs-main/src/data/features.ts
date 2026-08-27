@@ -24,7 +24,7 @@ export const features: Feature[] = [
     icon: ShieldCheck,
     title: 'AES-256 Encryption',
     description:
-      'Every secret is encrypted at rest with AES-256-GCM. Keys are derived from your master password using Argon2id, so your vault stays unreadable without it.',
+      'Every secret is encrypted at rest with AES-256-CBC. Keys are derived from your master password using scrypt, so your vault stays unreadable without it.',
   },
   {
     icon: TerminalSquare,

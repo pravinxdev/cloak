@@ -12,9 +12,29 @@ export interface EncryptedPayload {
   data: string; // AES-256 encrypted JSON string of secrets map
 }
 
+export const SHARE_PASSCODE_MIN_LENGTH = 8;
+export const SHARE_PASSCODE_MAX_LENGTH = 128;
+export const ALL_ENVIRONMENTS = '__all__';
+
+export function validateSharePasscode(passcode: unknown): asserts passcode is string {
+  if (typeof passcode !== 'string' || passcode.trim().length === 0) {
+    throw new Error('Passcode is required.');
+  }
+
+  if (passcode.length < SHARE_PASSCODE_MIN_LENGTH) {
+    throw new Error(`Passcode must be at least ${SHARE_PASSCODE_MIN_LENGTH} characters.`);
+  }
+
+  if (passcode.length > SHARE_PASSCODE_MAX_LENGTH) {
+    throw new Error(`Passcode must be no more than ${SHARE_PASSCODE_MAX_LENGTH} characters.`);
+  }
+}
+
 export function createSharePayload(passcode: string, envFilter?: string): { token: string; count: number } {
-  const env = envFilter || getActiveEnvironment();
-  const vault = envFilter ? loadVaultForEnvironment(envFilter) : loadVault();
+  validateSharePasscode(passcode);
+  const shareAllEnvironments = envFilter === ALL_ENVIRONMENTS;
+  const env = envFilter && !shareAllEnvironments ? envFilter : getActiveEnvironment();
+  const vault = envFilter && !shareAllEnvironments ? loadVaultForEnvironment(envFilter) : loadVault();
   const keys = Object.keys(vault);
   const secretsToShare: Record<string, SecretMetadata | string> = {};
 
@@ -25,7 +45,7 @@ export function createSharePayload(passcode: string, envFilter?: string): { toke
       : raw;
 
     const entryEnv = metadata.environment || env;
-    if (!envFilter || entryEnv === envFilter) {
+    if (!envFilter || shareAllEnvironments || entryEnv === envFilter) {
       secretsToShare[key] = metadata;
     }
   }
@@ -41,7 +61,7 @@ export function createSharePayload(passcode: string, envFilter?: string): { toke
   const payload: EncryptedPayload = {
     version: '1.0',
     createdAt: Date.now(),
-    environment: envFilter || env,
+    environment: shareAllEnvironments ? 'all' : envFilter || env,
     count,
     data: encryptedData
   };
@@ -53,6 +73,7 @@ export function createSharePayload(passcode: string, envFilter?: string): { toke
 }
 
 export function receiveSharePayload(token: string, passcode: string): { importedCount: number; environment?: string } {
+  validateSharePasscode(passcode);
   if (!token.startsWith('clkx_')) {
     throw new Error('Invalid CloakX share token format.');
   }

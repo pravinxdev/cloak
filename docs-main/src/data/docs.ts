@@ -3,6 +3,7 @@ import {
   Download,
   TerminalSquare,
   LayoutDashboard,
+  Share2,
   Code2,
   ShieldCheck,
   Boxes,
@@ -68,9 +69,21 @@ export const docs: DocEntry[] = [
     icon: LayoutDashboard,
     category: 'Guides',
     body: [
-      'Run cloakx web to launch the dashboard on http://localhost:7431. The server binds to loopback only, so it is never exposed to your network.',
-      'From the dashboard you can create and switch vaults, edit secrets, define environments, and export encrypted backups.',
+      'Run cloakx web to launch the dashboard on http://127.0.0.1:1201. The server binds to loopback only, so it is never exposed to your network.',
+      'From the dashboard you can create and switch vaults, edit secrets, define environments, share encrypted bundles, and export backups.',
       'Every action in the UI is also available in the CLI, so you can script anything you can click.',
+    ],
+  },
+  {
+    slug: 'sharing',
+    title: 'Encrypted Sharing',
+    description: 'Share environment secrets through passcode-protected bundles.',
+    icon: Share2,
+    category: 'Guides',
+    body: [
+      'Use the Share page in the Web Dashboard or run cloakx share to package the current environment into a clkx_ token.',
+      'Protect each bundle with a passcode from 8 to 128 characters. The passcode is required to decrypt and import the bundle.',
+      'Import a bundle with cloakx receive <token> --passcode <passcode>. The bundle is written to the recipient\'s active environment.',
     ],
   },
   {
@@ -116,7 +129,7 @@ export const docs: DocEntry[] = [
     icon: ShieldCheck,
     category: 'Reference',
     body: [
-      'CloakX encrypts every secret with AES-256-GCM. The encryption key is derived from your master password using Argon2id with a per-vault salt.',
+      'CloakX encrypts every secret with AES-256-CBC. The encryption key is derived from your master password using scrypt.',
       'Plaintext is never written to disk. Values are decrypted in memory only when you request them, and the in-memory key is wiped when the vault locks.',
       'Exports are encrypted bundles that require the master password to read, so they are safe to store in any backup target.',
     ],

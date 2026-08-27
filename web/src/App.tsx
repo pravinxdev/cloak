@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+﻿import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +13,7 @@ import EnvironmentsPage from "@/pages/EnvironmentsPage";
 import RunCommandPage from "@/pages/RunCommandPage";
 import SettingsPage from "@/pages/SettingsPage";
 import RecoveryPage from "@/pages/RecoveryPage";
+import SharePage from "@/pages/SharePage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,7 +23,6 @@ function AppRoutes() {
 
   if (!isLoggedIn) return <LoginPage />;
 
-  // Show recovery page if vaults need recovery
   if (needsRecovery) return <RecoveryPage />;
 
   return (
@@ -31,6 +31,7 @@ function AppRoutes() {
         <Route path="/" element={<SecretsPage />} />
         <Route path="/add" element={<AddSecretPage />} />
         <Route path="/edit" element={<AddSecretPage />} />
+        <Route path="/share" element={<SharePage />} />
         <Route path="/export" element={<ExportPage />} />
         <Route path="/import" element={<ImportPage />} />
         <Route path="/environments" element={<EnvironmentsPage />} />

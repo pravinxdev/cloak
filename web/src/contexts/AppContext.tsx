@@ -191,7 +191,7 @@ interface AppState {
 const AppContext = createContext<AppState | null>(null);
 
 const INITIAL_SECRETS: Secret[] = [
-  { id: "1", key: "DATABASE_URL", value: "postgres://user:pass@localhost:5432/db" },
+  { id: "1", key: "APP_DATABASE", value: "your-database-url" },
 ];
 
 const INITIAL_ENVS: Environment[] = [

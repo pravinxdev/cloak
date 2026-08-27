@@ -1,6 +1,6 @@
 {
   "name": "cloakx",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "Cloakx is a secure, lightweight CLI tool to manage your development secrets locally — no cloud, no hassle. Store, retrieve, and manage secrets across projects with encryption and ease. 🔐 Perfect for solo devs, indie hackers, and teams who value speed, simplicity, and security.",
   "main": "index.js",
   "bin": {
@@ -54,12 +54,15 @@
     "readline-sync": "^1.4.10"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21",
-    "@types/inquirer": "^9.0.8",
-    "@types/node": "^24.1.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^4.17.25",
+    "@types/inquirer": "^9.0.10",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.13.3",
     "@types/readline-sync": "^1.4.8",
+    "jest": "^30.4.2",
+    "ts-jest": "^29.4.12",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.3"
   }
 }

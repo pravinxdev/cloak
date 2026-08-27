@@ -293,7 +293,7 @@ export default function AddSecretPage() {
         <div className="space-y-2">
           <label className="text-sm font-medium">Value</label>
           <Input
-            placeholder="e.g. postgres://..."
+            placeholder="e.g. your-database-url"
             value={value}
             onChange={(e) => setValue(e.target.value)}
             className="bg-secondary border-border font-mono text-sm"
