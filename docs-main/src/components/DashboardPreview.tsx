@@ -340,7 +340,7 @@ export function DashboardPreview() {
   const activeScreen =
     dashboardScreens.find((s) => s.id === active) ?? dashboardScreens[1];
   const Screen = screenRenderers[activeScreen.id] ?? ScreenDashboard;
-  const url = `localhost:7431/${activeScreen.id}`;
+  const url = `127.0.0.1:1201/${activeScreen.id}`;
 
   return (
     <section id="web-dashboard-preview" className="section-pad relative">

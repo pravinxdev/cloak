@@ -32,13 +32,13 @@ export const architectureFlow: ArchitectureNode[] = [
   {
     id: 'vault',
     label: 'Encrypted Vault',
-    description: 'An on-disk AES-256-GCM vault, decrypted only in memory.',
+    description: 'An on-disk AES-256-CBC vault, decrypted only in memory.',
     icon: Lock,
   },
   {
     id: 'aes',
     label: 'AES Encryption',
-    description: 'Argon2id key derivation plus authenticated AES-256-GCM.',
+    description: 'scrypt key derivation plus AES-256-CBC encryption.',
     icon: ShieldCheck,
   },
   {
