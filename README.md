@@ -13,8 +13,8 @@
 ## ✨ Key Features
 
 ### 🔐 **Security**
-- AES-256-GCM encryption for all secrets
-- PBKDF2 password hashing
+- AES-256-CBC encryption for all secrets
+- scrypt key derivation with a fixed application salt
 - Password-protected vault access
 - Local-first architecture (no cloud required)
 - Session management with auto-logout
@@ -30,6 +30,7 @@
 - **CLI**: Full-featured command-line interface with 17+ commands
 - **Web UI**: Modern, responsive dashboard for browser-based access
 - **Environment Switching**: Easily manage secrets across environments
+- **Encrypted Sharing**: Create passcode-protected bundles for secure transfer
 - **Real-time Sync**: Keep secrets synchronized
 
 ### 🚀 **Developer Features**
@@ -475,6 +476,14 @@ cloakx run --env production bash deploy.sh
 **Available Options:**
 - `--env <environment>` - Use secrets from specific environment
 cloakx run npm start
+#### **sync** - Synchronize secrets into a .env file
+```bash
+cloakx sync
+# Syncs vault data (useful if configured with backend)
+cloakx sync                     # Sync active env secrets to local .env
+cloakx sync --env production    # Sync production secrets to .env
+cloakx sync -f custom.env       # Sync secrets to a custom filename
+cloakx sync --watch             # Real-time auto-sync on changes
 
 # Security: Secrets aren't visible in process list or shell history
 ```
@@ -489,6 +498,20 @@ cloakx web
 # Open browser to http://localhost:1201
 # Login with vault password
 ```
+
+#### **share** and **receive** - Share encrypted bundles
+```bash
+# Create a passcode-protected bundle from the active environment
+cloakx share --passcode "secure-passcode"
+
+# Share a specific environment
+cloakx share --env production --passcode "secure-passcode"
+
+# Import the bundle into the recipient's active environment
+cloakx receive "clkx_..." --passcode "secure-passcode"
+```
+
+Share passcodes must be between 8 and 128 characters. The web UI shares the currently active environment.
 
 #### **sync** - Synchronize vault
 ```bash
@@ -870,8 +893,8 @@ cloakx run docker run -e NODE_ENV=production myapp
 ## 🔒 Security Features
 
 ### **Encryption**
-- **Algorithm**: AES-256-GCM (authenticated encryption)
-- **Key Derivation**: PBKDF2 with 100,000 iterations
+- **Algorithm**: AES-256-CBC
+- **Key Derivation**: scrypt
 - **Storage**: All secrets encrypted at rest in `~/.cloakx/`
 
 ### **Password Protection**

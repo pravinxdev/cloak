@@ -17,6 +17,12 @@ import { runCommand } from './commands/run';
 import { envCommand } from './commands/env';
 import { syncCommand } from './commands/sync';
 import { changePasswordCommand } from './commands/change-password';
+import { hookCommand } from './commands/hook';
+import { auditCommand } from './commands/audit';
+import { shareCommand, receiveCommand } from './commands/share';
+
+
+
 import { APP_VERSION } from './config/version';
 
 
@@ -45,7 +51,11 @@ program
   .addCommand(runCommand())
   .addCommand(envCommand())
   .addCommand(syncCommand())
-  .addCommand(changePasswordCommand());
+  .addCommand(changePasswordCommand())
+  .addCommand(hookCommand())
+  .addCommand(auditCommand())
+  .addCommand(shareCommand())
+  .addCommand(receiveCommand())
 
 
 program.parse(process.argv);

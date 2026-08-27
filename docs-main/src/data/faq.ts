@@ -12,7 +12,7 @@ export const faqItems: FaqItem[] = [
   {
     question: 'How secure is it?',
     answer:
-      'Every secret is encrypted at rest with AES-256-GCM. Your master password is never stored or sent anywhere — it is run through Argon2id key derivation locally to produce the encryption key. Values are decrypted only in memory and only when you request them, and the vault locks automatically after inactivity.',
+      'Every secret is encrypted at rest with AES-256-CBC. Your master password is never stored or sent anywhere — it is run through scrypt locally to produce the encryption key. Values are decrypted only in memory and only when you request them, and the vault locks automatically after inactivity.',
   },
   {
     question: 'Where are secrets stored?',
@@ -27,7 +27,7 @@ export const faqItems: FaqItem[] = [
   {
     question: 'Does it support teams?',
     answer:
-      'Team support with shared vaults, role-based access control, and an audit log is on the roadmap and coming soon. Today, you can share secrets securely by exporting an encrypted bundle that only the recipient can unlock with the master password.',
+      'Team support with shared vaults, role-based access control, and an audit log is on the roadmap. Today, you can share environment bundles securely with a passcode from 8 to 128 characters.',
   },
   {
     question: 'Can I export my secrets?',

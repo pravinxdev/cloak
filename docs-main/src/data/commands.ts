@@ -14,6 +14,7 @@ import {
   Play,
   Globe,
   Settings,
+  Share2,
 } from 'lucide-react';
 
 export interface CliCommand {
@@ -61,6 +62,12 @@ export const cliCommands: CliCommand[] = [
     example: '$ cloakx list\nOPENAI_KEY\nDATABASE_URL\nJWT_SECRET',
   },
   {
+    command: 'cloakx sync',
+    description: 'Synchronize active environment secrets into a local .env file (supports --watch).',
+    icon: RefreshCw,
+    example: '$ cloakx sync --env production --watch\n✔ Syncing production secrets to .env\n✔ Watching for changes...',
+  },
+  {
     command: 'cloakx update',
     description: 'Rotate an existing secret value in place, preserving its key.',
     icon: RefreshCw,
@@ -85,6 +92,12 @@ export const cliCommands: CliCommand[] = [
     example: '$ cloakx import .env\n✔ Imported 6 secrets from .env',
   },
   {
+    command: 'cloakx share',
+    description: 'Create or receive an AES-256 encrypted secret bundle protected by a passcode.',
+    icon: Share2,
+    example: '$ cloakx share --env production --passcode secure-passcode\n✔ Encrypted 6 secret(s)\n$ cloakx receive clkx_... --passcode secure-passcode',
+  },
+  {
     command: 'cloakx env',
     description: 'Load an environment group and run a child process with injected vars.',
     icon: FileCode2,
@@ -100,7 +113,7 @@ export const cliCommands: CliCommand[] = [
     command: 'cloakx web',
     description: 'Launch the local Web Dashboard in your default browser on a port.',
     icon: Globe,
-    example: '$ cloakx web\n✔ Dashboard running at http://localhost:7431',
+    example: '$ cloakx web\n✔ Dashboard running at http://127.0.0.1:1201',
   },
   {
     command: 'cloakx config',

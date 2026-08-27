@@ -38,7 +38,7 @@ export const roadmap: RoadmapItem[] = [
   {
     icon: ShieldCheck,
     title: 'Encryption',
-    description: 'AES-256-GCM encryption with Argon2id key derivation.',
+    description: 'AES-256-CBC encryption with scrypt key derivation.',
     status: 'completed',
   },
   {
@@ -62,8 +62,8 @@ export const roadmap: RoadmapItem[] = [
   {
     icon: Share2,
     title: 'Secret Sharing',
-    description: 'Share single secrets via encrypted, expiring links.',
-    status: 'coming',
+    description: 'Share environment bundles with passcode-protected encrypted tokens.',
+    status: 'completed',
   },
   {
     icon: Users,

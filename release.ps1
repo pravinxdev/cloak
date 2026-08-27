@@ -1,3 +1,5 @@
+
+
 #!/usr/bin/env pwsh
 
 <#
@@ -151,9 +153,9 @@ Write-Host "✅ Publish status:         SUCCESS" -ForegroundColor $colors.Green
 Write-Host ""
 
 Write-Host "📊 What changed:" -ForegroundColor $colors.Cyan
-Write-Host "   • src/config/version.ts  -> Updated to $Version"
-Write-Host "   • package.json           -> Synced to $Version"
-Write-Host "   • npm registry           -> Published v$Version"
+Write-Host "   • src/config/version.ts  → Updated to $Version"
+Write-Host "   • package.json           → Synced to $Version"
+Write-Host "   • npm registry           → Published v$Version"
 Write-Host ""
 
 Write-Host "📢 For users to update:" -ForegroundColor $colors.Gray

@@ -7,13 +7,10 @@ import path from 'path';
 import os from 'os';
 import { getVaultPath } from '../../src/config/paths';
 import { decrypt } from '../../src/utils/crypto';
-import { loadVault, saveVault, getSecretValue, updateSecret, loadVaultForEnvironment, saveVaultForEnvironment, getAllSecretsFromAllEnvironments, cleanExpiredSecrets } from '../../src/utils/vault';
+import { loadVault, saveVault, getSecretValue, updateSecret, loadVaultForEnvironment, saveVaultForEnvironment, getAllSecretsFromAllEnvironments, cleanExpiredSecrets, Vault } from '../../src/utils/vault';
 import { listEnvironments, getActiveEnvironment, setActiveEnvironment, createEnvironment, deleteEnvironment } from '../../src/utils/environments';
 
 const router = Router();
-
-// 🧪 DEVELOPMENT: Bypass rate limiter for testing
-const noopLimiter = (req: any, res: any, next: any) => next();
 
 // 🔐 FIXED: Rate limiting to prevent brute force attacks
 const loginLimiter = rateLimit({
@@ -37,7 +34,7 @@ const passwordLimiter = rateLimit({
 });
 
 // 🔐 Login
-router.post('/login', noopLimiter as any, (req, res) => {
+router.post('/login', loginLimiter, (req, res) => {
   const { password } = req.body;
 
   try {
@@ -111,42 +108,42 @@ router.post('/change-password', passwordLimiter as any, (req, res) => {
       return res.status(401).json({ error: 'Invalid current password' });
     }
 
-    // ✅ Re-encrypt all secrets in all environments
+    // 🔄 PHASE 1: Decrypt every secret in every environment with the old key.
+    // No writes happen here — if anything fails we abort with all vaults untouched,
+    // so a partially-corrupt environment can never leave vaults on mixed keys.
+    const prepared: { env: string; vault: Vault; decryptedSecrets: Record<string, string> }[] = [];
     for (const env of environments) {
-      try {
-        const vault = loadVaultForEnvironment(env);
-        const decryptedSecrets: Record<string, string> = {};
+      const vault = loadVaultForEnvironment(env);
+      const decryptedSecrets: Record<string, string> = {};
 
-        // Decrypt all secrets with old key
-        for (const key of Object.keys(vault)) {
-          try {
-            const encrypted = getSecretValue(vault, key);
-            if (encrypted) decryptedSecrets[key] = decrypt(encrypted, oldKey);
-          } catch (err: any) {
-            return res.status(500).json({ 
-              error: `Failed to decrypt secret in ${env}: ${key}. Vault may be corrupted.` 
-            });
-          }
+      for (const key of Object.keys(vault)) {
+        try {
+          const encrypted = getSecretValue(vault, key);
+          if (encrypted) decryptedSecrets[key] = decrypt(encrypted, oldKey);
+        } catch (err: any) {
+          return res.status(500).json({
+            error: `Failed to decrypt secret in ${env}: ${key}. Vault may be corrupted. No changes were made.`
+          });
         }
+      }
 
-        // Re-encrypt all with new key
+      prepared.push({ env, vault, decryptedSecrets });
+    }
+
+    // 🔄 PHASE 2: All environments decrypted successfully → re-encrypt with the
+    // new key and save. Encryption here is deterministic and cannot fail on
+    // genuine data, so a mixed state is not introduced.
+    for (const { env, vault, decryptedSecrets } of prepared) {
+      try {
         const updatedVault = { ...vault };
         for (const key of Object.keys(decryptedSecrets)) {
-          try {
-            const encrypted = encrypt(decryptedSecrets[key], newKey);
-            updateSecret(updatedVault, key, encrypted);
-          } catch (err: any) {
-            return res.status(500).json({ 
-              error: `Failed to encrypt secret in ${env}: ${key}. Password not changed.` 
-            });
-          }
+          const encrypted = encrypt(decryptedSecrets[key], newKey);
+          updateSecret(updatedVault, key, encrypted);
         }
-
-        // Save updated vault for this environment
         saveVaultForEnvironment(updatedVault, env);
       } catch (err: any) {
-        return res.status(500).json({ 
-          error: `Failed to update environment ${env}: ${err.message}` 
+        return res.status(500).json({
+          error: `Failed to re-encrypt environment ${env}: ${err.message}. Password was NOT changed.`
         });
       }
     }
@@ -273,8 +270,8 @@ function validateKey(key: any): string | null {
   if (key.length > 256) {
     return 'Key is too long (max 256 characters)';
   }
-  if (!/^[a-zA-Z0-9_-]+$/.test(key)) {
-    return 'Key can only contain letters, numbers, hyphens, and underscores';
+  if (!/^[a-zA-Z0-9._-]+$/.test(key)) {
+    return 'Key can only contain letters, numbers, dots, hyphens, and underscores';
   }
   return null;
 }
@@ -491,26 +488,6 @@ router.delete('/secrets/:key', (req, res) => {
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to delete secret: " + err.message });
-  }
-});
-
-// 🌍 Get environments list and active environment
-router.get('/environments', (req, res) => {
-  try {
-    getSessionKey();
-    const environments = listEnvironments();
-    const active = getActiveEnvironment();
-
-    res.json({
-      environments: environments.map((env) => ({
-        id: env,
-        name: env,
-        active: env === active
-      })),
-      activeEnvironment: active
-    });
-  } catch (err: any) {
-    res.status(401).json({ error: err.message || "Not logged in" });
   }
 });
 

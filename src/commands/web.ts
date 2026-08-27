@@ -6,6 +6,7 @@ import cors from "cors";
 import authRouter from "../../server/routes/auth";
 import secretsRouter from "../../server/routes/secrets";
 import vaultRouter from "../../server/routes/vault";
+import shareRouter from "../../server/routes/share";
 import { getSessionKey } from "../utils/session";
 import open from "open";
 import { createServer } from "http";
@@ -26,7 +27,7 @@ function isPortAvailable(port: number): Promise<boolean> {
       server.close();
       resolve(true);
     });
-    server.listen(port);
+    server.listen(port, "127.0.0.1");
   });
 }
 
@@ -153,6 +154,7 @@ export function webCommand() {
     app.use("/api", authRouter as any);
 
     // Protected routes (require auth)
+    app.use("/api/share", requireAuth, shareRouter as any);
     app.use("/api/secrets", requireAuth, secretsRouter as any);
     app.use("/api", requireAuth, vaultRouter as any);
 
@@ -170,7 +172,7 @@ export function webCommand() {
       res.status(500).json({ error: "Internal server error" });
     });
 
-    const server = app.listen(PORT, () => {
+    const server = app.listen(PORT, "127.0.0.1", () => {
       console.log(`\n🌐 Cloakx Web UI is running!`);
       console.log(`   📱 Frontend URL: http://127.0.0.1:${PORT}`);
       console.log(`   🔗 Backend API: http://127.0.0.1:2000`);

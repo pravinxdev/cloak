@@ -1,9 +1,6 @@
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
-
-const baseDir = path.join(os.homedir(), '.cloakx');
-const configPath = path.join(baseDir, 'config.json');
+import { baseDir, configPath } from '../config/paths';
 
 interface Config {
   env: string;

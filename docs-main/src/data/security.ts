@@ -12,7 +12,7 @@ export const securityFeatures: SecurityItem[] = [
     icon: ShieldCheck,
     title: 'AES-256 Encryption',
     description:
-      'Secrets are encrypted with AES-256-GCM, the same cipher approved for top-secret government data.',
+      'Secrets are encrypted with AES-256-CBC and remain protected in the local vault.',
   },
   {
     icon: EyeOff,
@@ -57,13 +57,13 @@ export const securityTimeline: SecurityTimelineStep[] = [
     step: '01',
     title: 'Master Password',
     description:
-      'You set a strong master password. CloakX derives a 256-bit key from it using Argon2id with a unique salt.',
+      'You set a strong master password. CloakX derives a 256-bit key from it using scrypt.',
   },
   {
     step: '02',
     title: 'Encrypt on Write',
     description:
-      'When you store a secret, it is encrypted with AES-256-GCM and written to disk as ciphertext only.',
+      'When you store a secret, it is encrypted with AES-256-CBC and written to disk as ciphertext only.',
   },
   {
     step: '03',

@@ -40,14 +40,19 @@ export function setCommand() {
           ? options.tags.split(',').map((t: string) => t.trim()).filter((t: string) => t)
           : undefined;
         
-        let expiresAt: number | undefined;
-        if (options.expires) {
-          const parsed = parseExpiration(options.expires);
-          if (!parsed) {
-            console.error('❌ Invalid expiration format. Use: 30d, 7d, or 2026-12-31');
-            return;
+        let expiresAt: number | null | undefined;
+        if (options.expires !== undefined) {
+          // Empty string clears the expiry
+          if (options.expires === '') {
+            expiresAt = null;
+          } else {
+            const parsed = parseExpiration(options.expires);
+            if (!parsed) {
+              console.error('❌ Invalid expiration format. Use: 30d, 7d, or 2026-12-31');
+              return;
+            }
+            expiresAt = parsed;
           }
-          expiresAt = parsed;
         }
 
         // 🔒 Encrypt value
@@ -71,7 +76,9 @@ export function setCommand() {
         console.log(`✅ Saved ${key}`);
         if (tags?.length) console.log(`   Tags: ${tags.join(', ')}`);
         if (environment !== 'default') console.log(`   Environment: ${environment}`);
-        if (expiresAt) {
+        if (expiresAt === null) {
+          console.log('   Expiration cleared');
+        } else if (expiresAt) {
           const date = new Date(expiresAt).toISOString().split('T')[0];
           console.log(`   Expires: ${date}`);
         }

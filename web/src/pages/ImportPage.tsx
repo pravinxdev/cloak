@@ -164,7 +164,7 @@ export default function ImportPage() {
         value={text}
         onChange={(e) => handleTextChange(e.currentTarget.value)}
         placeholder={
-          "# Paste your .env contents here\nDATABASE_URL=postgres://...\nAPI_KEY=sk-..."
+          "# Paste your .env contents here\nAPP_DATABASE=your-database-url\nSERVICE_TOKEN=your-token"
         }
         className="w-full h-56 bg-secondary border border-border rounded-lg p-4 font-mono text-xs resize-none focus:outline-none focus:ring-1 focus:ring-ring text-foreground placeholder:text-muted-foreground"
       />

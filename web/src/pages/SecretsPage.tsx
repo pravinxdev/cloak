@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { decryptValue } from "@/utils/decrypt";
@@ -10,6 +10,7 @@ import {
   Pencil,
   Plus,
   Search,
+  Share2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -46,15 +47,10 @@ export default function SecretsPage() {
   const [selectedTag, setSelectedTag] = useState<string>("");
   const [selectedEnv, setSelectedEnv] = useState<string>(appContext?.activeEnvironment || "");
 
-  // ✅ fetch secrets
   const fetchSecrets = async () => {
     try {
       setLoading(true);
       const data = await api.getSecrets();
-      console.log(`📝 Loaded ${Array.isArray(data) ? data.length : 0} secrets`);
-      if (Array.isArray(data) && data.length > 0) {
-        console.log(`   First secret:`, data[0]);
-      }
       setSecrets(Array.isArray(data) ? data : []);
     } catch (err: any) {
       console.error(err);
@@ -68,22 +64,18 @@ export default function SecretsPage() {
     fetchSecrets();
   }, []);
 
-  // 🌍 Update selectedEnv when active environment changes
   useEffect(() => {
     if (appContext?.activeEnvironment) {
       setSelectedEnv(appContext.activeEnvironment);
     }
   }, [appContext?.activeEnvironment]);
 
-  // ✅ Get unique tags and environments
   const allTags = Array.from(
     new Set(secrets.flatMap((s) => s.tags || []).filter(tag => tag && tag.trim()))
   ).sort();
   
-  // 🌍 Get all environments from appContext (API), not just from secrets
   const allEnvs = appContext?.environments?.map(e => e.name) || [];
 
-  // ✅ filter
   const filtered = secrets.filter((s) => {
     const matchesSearch = s.key
       .toLowerCase()
@@ -93,14 +85,8 @@ export default function SecretsPage() {
       selectedEnv === "__all__" || !selectedEnv || (s.environment || "default") === selectedEnv;
     return matchesSearch && matchesTag && matchesEnv;
   });
-console.log(filtered)
-  // ✅ toggle reveal - decrypt locally using session key
+
   const toggleReveal = async (key: string, encryptedValue: string) => {
-    console.log(`🔍 Toggle reveal for key: ${key}`);
-    console.log(`   Encrypted value: ${encryptedValue}`);
-    console.log(`   Session key available: ${!!appContext?.sessionKey}`);
-    
-    // If already revealed, just hide it
     if (revealed.has(key)) {
       setRevealed((prev) => {
         const next = new Set(prev);
@@ -110,30 +96,24 @@ console.log(filtered)
       return;
     }
 
-    // If not revealed yet, decrypt the value locally
     try {
       if (!appContext?.sessionKey) {
         throw new Error("Session key not available");
       }
 
       const decrypted = await decryptValue(encryptedValue, appContext.sessionKey);
-      console.log(`   ✅ Decrypted successfully: ${decrypted}`);
       setDecryptedValues((prev) => ({ ...prev, [key]: decrypted }));
       setRevealed((prev) => new Set([...prev, key]));
     } catch (err: any) {
-      console.error(`❌ Decryption failed:`, err);
       toast.error("Failed to decrypt secret");
       console.error(err);
     }
   };
 
-  // ✅ copy - decrypt locally and copy to clipboard
   const copyValue = async (key: string, encryptedValue: string) => {
     try {
-      // If already decrypted, use cached value
       let valueToCopy = decryptedValues[key];
       
-      // If not cached, decrypt it locally
       if (!valueToCopy) {
         if (!appContext?.sessionKey) {
           throw new Error("Session key not available");
@@ -151,7 +131,6 @@ console.log(filtered)
     }
   };
 
-  // ✅ delete
   const confirmDelete = async () => {
     if (!deleteKey) return;
 
@@ -171,7 +150,7 @@ console.log(filtered)
   return (
     <div className="max-w-full space-y-4">
 
-      {/* Search + Add */}
+      {/* Search + Buttons */}
       <div className="flex items-center justify-between gap-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -183,9 +162,14 @@ console.log(filtered)
           />
         </div>
 
-        <Button onClick={() => navigate("/add")} size="sm">
-          <Plus className="h-4 w-4 mr-1" /> Add Secret
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={() => navigate("/share")} variant="outline" size="sm">
+            <Share2 className="h-4 w-4 mr-1" /> Share
+          </Button>
+          <Button onClick={() => navigate("/add")} size="sm">
+            <Plus className="h-4 w-4 mr-1" /> Add Secret
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -267,7 +251,6 @@ console.log(filtered)
                   <td className="px-4 py-3 font-mono text-xs">{secret.key}</td>
 
                   <td className="px-4 py-3 text-xs space-y-1">
-                    {/* Tags */}
                     {secret.tags && secret.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {secret.tags.map((tag) => (
@@ -281,14 +264,12 @@ console.log(filtered)
                       </div>
                     )}
                     
-                    {/* Environment */}
                     {(secret.environment || "default") && (
                       <div className="text-muted-foreground">
                         Env: <kbd className="rounded bg-muted px-1 text-xs">{secret.environment || "default"}</kbd>
                       </div>
                     )}
 
-                    {/* Expiration */}
                     {secret.expiresAt && (
                       <div>
                         <ExpirationIndicator expiresAt={secret.expiresAt} />
@@ -338,7 +319,6 @@ console.log(filtered)
         </table>
       </div>
 
-      {/* Delete Dialog */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent>
           <DialogHeader>
@@ -361,7 +341,6 @@ console.log(filtered)
         </DialogContent>
       </Dialog>
 
-      {/* Count */}
       {!loading && (
         <p className="text-xs text-muted-foreground">
           {filtered.length} secret{filtered.length !== 1 ? "s" : ""}
